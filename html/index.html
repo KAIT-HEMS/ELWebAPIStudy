@@ -1,0 +1,728 @@
+<!-- index.html for elwebapistudy-->
+<!-- 2020.12.23 -->
+<!-- Copyright (c) 2020 Kanagawa Institute of Technology, ECHONET Consortium -->
+<!-- Released under the MIT License. -->
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/lib/fontawesome-free/css/all.css">
+
+  <title>EL WebApi Study Tool</title>
+  <style>
+    html {
+      position: relative;
+      min-height: 100%;
+    }
+    main.container {
+      padding: 70px 0 0;
+    }
+    .navbar h1 {
+      font-size: 100%;
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+    .card-deck {
+      margin-bottom: 20px;
+    }
+    .card-header {
+      padding: 0.1em 1em;
+    }
+    .form-group {
+      margin: 0;
+      padding: 0;
+    }
+    .request-response-body {
+      margin: 0;
+      padding: 0;
+    }
+    .request-response-wrapper {
+      height: 40em;
+      overflow-y: scroll;
+    }
+    .request-response-list li {
+      font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
+      font-size: 90%;
+      padding: 0.2em 1em;
+    }
+    #message-monitor-body {
+      margin: 0;
+      padding: 0;
+    }
+    #message-list-wrapper {
+      height: 30em;
+      overflow-y: scroll;
+    }
+    #message-list li {
+      font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
+      font-size: 90%;
+      padding: 0.2em 1em;
+      cursor: pointer;
+    }
+    #message-list li span {
+      display: inline-block;
+    }
+    #message-list li span.col1 {
+      width: 5em;
+    }
+    #message-list li span.col2 {
+      width: 3em;
+    }
+    #setting-devices-body {
+      margin: 0;
+      padding: 0;
+    }
+    #setting-devices-list-wrapper {
+      height: 30em;
+      overflow-y: scroll;
+    }
+    #setting-devices-list li {
+      font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
+      font-size: 90%;
+      padding: 0.2em 1em;
+      cursor: pointer;
+    }
+    #setting-devices-list li span {
+      display: inline-block;
+    }
+    #setting-devices-list li span.col1 {
+      width: 20em;
+    }
+    #setting-devices-list li span.col2 {
+      width: 30em;
+    }
+    #setting-devices-list li span.col3 {
+      width: 4em;
+    }
+    /* slider value */
+    .slider-value {
+      text-align: center;
+      font-size: 1em;
+      width: 40px; 
+      height: 10px;
+      line-height: 10px;
+      margin: 7px 0px 0px 5px;
+    }
+    /* slider horizontal bar */
+    input[type="range"] {
+        display: block;
+        -webkit-appearance: none;
+        background-color: #bdc3c7;
+        width: 120px;
+        height: 5px;
+        outline: 0;
+        margin: 12px 0px 0px 10px;
+    }
+    /* slider knob */
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        background-color: #de1616;
+        width: 10px;
+        height: 20px;
+        border: 1px solid white;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container" id="app">
+    <header>
+      <div class="navbar navbar-expand-md navbar-dark fixed-top bg-dark d-block">
+        <!-- App name -->
+        <h1 class="d-inline-block pl-5 ml-2">
+          <router-link to="/home">
+            <a class="navbar-brand">
+              <span style="color:#FFFFFF;">ECHONET Lite WebAPI 学習 Tool</span>
+            </a>
+          </router-link>
+        </h1>
+
+        <div class="d-inline-block float-right pr-5 mr-2">
+          <!-- ホームボタン -->
+          <router-link to="/home">
+            <a class="btn" title="Back to the home">
+              <i class="fas fa-home" style="color:#FFFFFF;"></i>
+            </a>
+          </router-link>
+          <!-- 設定ボタン -->
+          <router-link to="/setting">
+            <a class="btn" title="Setting">
+              <i class="fas fa-cog" style="color:#FFFFFF;"></i>
+            </a>
+          </router-link>
+          <!-- HELPボタン -->
+          <router-link to="/help">
+            <a class="btn" title="Help">
+              <i class="fas fa-question-circle" style="color:#FFFFFF;"></i>
+            </a>
+          </router-link>
+        </div>
+      </div>
+    </header>
+
+    <main role="main" class="container">
+			<router-view></router-view>
+		</main>
+  </div>
+
+  <!-- Template for Home page-->
+  <script type="text/x-template" id="tmpl-page-home">
+    <div>
+
+
+      <div class="row">
+        <!-- Card: Left Window -->
+        <div class="card col-6 px-0 mb-3">
+          <div class="card-header">
+            <h5>Operation</h5>
+          </div>
+          <div class="card-body p-2">
+
+            <!-- Card: Device -->
+            <div class="card col-12 px-0 mb-1">
+              <div class="card-header">
+
+                <div class="row">
+                  <div class="col-auto pt-1 h5">Device</div>
+                  <div class="col"></div>
+                  <!-- Get device info ボタン -->
+                  <div class="col-auto p-1">
+                    <button type="button" class="btn btn-secondary btn-sm" title="Get device info" v-on:click="sendButtonIsClicked">
+                      Get device info
+                    </button>
+                  </div>
+                  <!-- Clear ボタン -->
+                  <div class="col-auto p-1">
+                    <button type="button" class="btn btn-secondary btn-sm" title="Clear" v-on:click="sendButtonIsClicked">
+                      Clear
+                    </button>
+                  </div>
+                </div>
+      
+              </div>
+              <div class="card-body py-1">
+                <div class="row border">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-light" title="lighting" v-on:click="sendButtonIsClicked">
+                      <img src="./graphic/lighting.png">
+                    </button>
+
+                    <button type="button" class="btn btn-light" title="airCon" v-on:click="sendButtonIsClicked">
+                      <img src="./graphic/airConditioner.png">
+                    </button>
+
+                    <button type="button" class="btn btn-light" title="waterHeater" v-on:click="sendButtonIsClicked">
+                      <img src="./graphic/waterHeater.png">
+                    </button>
+                  </div>
+                  <div class="col px-0 border">
+                    <ul class="list-group request-response-list">
+                      <li class="list-group-item">id : FE000077029049D</li>
+                      <li class="list-group-item">deviceType: homeAirConditioner</li>
+                      <li class="list-group-item">version: Release M</li>
+                      <li class="list-group-item">manufacturer: 神奈川工科大学</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card: Device description -->
+            <div class="card col-12 px-0 mb-1">
+              <div class="card-header">
+                <div class="row">
+                  <div class="col-auto pt-1 h5">Device description</div>
+                  <div class="col"></div>
+                  <!-- Get Device descriptions ボタン -->
+                  <div class="col-auto px-0">
+                      <button type="button" class="btn btn-secondary btn-sm" title="Get Device descriptions" v-on:click="sendButtonIsClicked" >Get Device descriptions</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-body py-0">
+                <table class="table table-sm m-0">
+                  <thead>
+                    <th>property name</th>
+                    <th>description</th>
+                    <th>data type</th>
+                  </thead>
+                  <tr>
+                    <td>operationStatus</td>
+                    <td>動作状態</td>
+                    <td>string</td>
+                  </tr>
+                  <tr>
+                    <td>operationMode</td>
+                    <td>運転モード</td>
+                    <td>string</td>
+                  </tr>
+                  <tr>
+                    <td>targetTemperature</td>
+                    <td>温度設定値</td>
+                    <td>number</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+
+            <!-- Card: Property -->
+            <div class="card col-12 px-0 mb-1">
+              <div class="card-header">
+                <div class="row">
+                  <div class="col-auto pt-1 h5">Property</div>
+                  <div class="col"></div>
+                  <!-- Get all property values ボタン -->
+                  <div class="col-auto px-0">
+                    <button type="button" class="btn btn-secondary btn-sm" title="Get all property values" v-on:click="sendButtonIsClicked" >Get all property values</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-body py-0">
+                <table class="table table-sm m-0">
+                  <thead>
+                    <th>プロパティ名</th>
+                    <th>設定</th>
+                    <th>値取得</th>
+                  </thead>
+                  <tr>
+                    <td>動作状態</td>
+                    <td>
+                      <button type="button" class="btn btn-secondary btn-sm" title="ON" v-on:click="sendButtonIsClicked" >ON</button>
+                      <button type="button" class="btn btn-secondary btn-sm" title="OFF" v-on:click="sendButtonIsClicked" >OFF</button>
+                    </td>
+                    <td>
+                      <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="sendButtonIsClicked">Get value</button>
+                      ON
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>運転モード</td>
+                    <td>
+                      <button type="button" class="btn btn-secondary btn-sm" title="冷房" v-on:click="sendButtonIsClicked" >冷房</button>
+                      <button type="button" class="btn btn-secondary btn-sm" title="暖房" v-on:click="sendButtonIsClicked" >暖房</button>
+                      <button type="button" class="btn btn-secondary btn-sm" title="送風" v-on:click="sendButtonIsClicked" >送風</button>
+                    </td>
+                    <td>
+                      <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="sendButtonIsClicked">Get value</button>
+                      暖房
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>温度設定値</td>
+                    <td>
+                      <div class="row">
+                        <input id="slider-1" type="range" value="50" min="0" max="100" >
+                        <div class="slider-value" id="realTimeValue" >24℃</div>
+                      </div>
+                    </td>
+                    <td>
+                      <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="sendButtonIsClicked">Get value</button>
+                      26℃
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+            </div>
+
+            <!-- Operation guide -->
+            <div class="row mx-0">
+              <div class="col-auto p mt-1 border">操作ガイド</div>
+              <div class="col p mt-1 border">Operation guide content</div>
+            </div>
+
+
+          </div>
+        </div>
+
+        <!-- Card: Right Window -->
+        <div class="card col-6 px-0 mb-3">
+          <div class="card-header">
+            <h5>Request & Response</h5>
+          </div>
+
+          <div class="card-body request-response-body">
+            <div class="request-response-wrapper">
+              <ul class="list-group request-response-list">
+                <li class="list-group-item" >REQ GET https://webapiechonet.com/elapi/v1/devices</li>
+                <li class="list-group-item" >RES status code: 200</li>
+                <li class="list-group-item" >
+                <pre>
+    {
+      "devices": [
+        {
+          "id": "FE000077029049CB718F42B2DEF6695A61",
+          "deviceType": "generalLighting",
+          "protocol": {
+            "type": "ECHONET_Lite v1.13",
+            "version": "Rel.M"
+          },
+          "manufacturer": {
+            "code": "0x000077",
+            "descriptions": {
+              "ja": "神奈川工科大学",
+              "en": "Kanagawa Institute of Technology"
+            }
+          }
+        },
+        {
+          "id": "FE000077029049CB718F42B2DEF6695A61",
+          "deviceType": "generalLighting",
+          "protocol": {
+            "type": "ECHONET_Lite v1.13",
+            "version": "Rel.M"
+          },
+          "manufacturer": {
+            "code": "0x000077",
+            "descriptions": {
+              "ja": "神奈川工科大学",
+              "en": "Kanagawa Institute of Technology"
+            }
+          }
+        },
+        {
+          "id": "FE0000770288BA19E5CB60D3BDFBFA838A",
+          "deviceType": "lvSmartElectricEnergyMeter",
+          "protocol": {
+            "type": "ECHONET_Lite v1.13",
+            "version": "Rel.M"
+          },
+          "manufacturer": {
+            "code": "0x000077",
+            "descriptions": {
+              "ja": "神奈川工科大学",
+              "en": "Kanagawa Institute of Technology"
+            }
+          }
+        }
+      ]
+    }
+                  </pre>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+      
+
+
+      <!-- input data -->
+      <div class="card mb-3">
+        <!-- input data header -->
+        <div class="card-header py-1">
+          <div class="row">
+            <div class="col-auto h5 mt-2">Send Request</div>
+            <div class="col"></div>
+            <div class="col-auto mt-2"> {{scheme}}://{{elApiServer}}{{prefix}}</div>
+            <div class="col-auto"></div>
+            <div class="col-auto mt-1 pl-0">
+              <!-- SENDボタン -->
+              <button type="button" class="btn btn-secondary btn-sm" title="Send request" v-on:click="sendButtonIsClicked" >SEND</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- input data body -->
+        <div class="card-body pt-2 pb-2">
+          <form>
+            <!-- 1st row -->
+            <div class="form-row align-items-center">
+              <div class="form-group col-md-1">
+                <label for="inputMethod">Method</label>
+                <select id="inputMethod" class="form-control" v-model="methodSelected" v-on:change="methodIsUpdated" v-bind:style="methodStyle">
+                  <option v-for="method in methodList">{{ method }}</option>
+                </select>
+              </div>
+              <div class="form-group col-md-2">
+                <label for="inputService">Service</label>
+                <select id="inputService" class="form-control" v-model="serviceSelected" v-on:change="serviceIsUpdated" v-bind:style="serviceStyle">
+                  <option v-for="service in serviceList">{{ service }}</option>
+                </select>
+              </div>
+              <div class="form-group col-md-2">
+                <label for="inputId">Id</label>
+                <select id="inputId" class="form-control" title="Id" v-model="idSelected" v-on:change="idIsUpdated" >
+                  <option v-for="idInfo in idInfoList" v-bind:title="idInfo.deviceType" >{{ idInfo.id }}</option>
+                </select>
+              </div>
+              <div class="form-group col-md-2">
+                <label for="inputResourceType">Resource Type</label>
+                <select id="inputResourceType" class="form-control" v-model="resourceTypeSelected" v-on:change="resourceTypeIsUpdated" v-bind:style="resourceTypeStyle">
+                  <option v-for="resourceType in resourceTypeList">{{ resourceType }}</option>
+                </select>
+              </div>
+              <div class="form-group col-md-3">
+                <label for="inputResourceName">Resource Name</label>
+                <select id="inputResourceName" class="form-control" v-model="resourceNameSelected" v-on:change="resourceNameIsUpdated" v-bind:style="resourceNameStyle">
+                  <option v-for="resourceName in resourceNameList">{{ resourceName }}</option>
+                </select>
+              </div>
+              <div class="form-group col-md-2">
+                <label for="inputQuery">query</label>
+                <input type="text" class="form-control" id="inputQuery" v-model="query" v-bind:style="queryStyle">
+              </div>
+            </div>
+
+            <!-- 2nd row -->
+            <div class="form-row" id="second-line">
+              <div class="form-group col-md-3"></div>
+              <div class="form-group col-md-2">
+                <label>{{ deviceType }}</label>
+              </div>
+            </div>
+
+            <!-- 3rd row -->
+            <div class="form-row">
+              <div class="form-group col-md-10">
+                <div class="input-group mb-2 mx-1">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text">Body data</div>
+                  </div>
+                  <input type="text" class="form-control" id="inputBody" v-model="body" v-bind:style="bodyStyle">
+                </div>
+              </div>
+
+              <div class="col-auto"></div>
+              <div class="col-auto mt-1 pl-0">
+                <button type="button" class="btn btn-secondary btn-sm" title="Copy from Response" v-on:click="copyFromResponseButtonIsClicked">Copy from Response</button>
+              </div>
+    
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+      <!-- Request & Response -->
+      <div class="card">
+        <!-- R&R header-->
+        <div class="card-header py-1">
+          <div class="row">
+            <div class="col-auto h5 mt-2">Request & Response</div>
+          </div>
+        </div>
+
+        <!-- R&R body -->
+        <div class="card-body request-response-body">
+          <div class="request-response-wrapper">
+            <ul class="list-group request-response-list">
+              <li class="list-group-item" >{{request}}</li>
+              <li class="list-group-item" >{{statusCode}}</li>
+              <li class="list-group-item" ><pre>{{response}}</pre></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOG -->
+      <div class="card">
+        <!-- LOG header-->
+        <div class="card-header py-1">
+          <div class="row">
+            <div class="col-auto h5 mt-2">LOG</div>
+            <div class="col"></div>
+
+            <!-- Order block -->
+            <div class="col-auto pl-0">
+              <div class="input-group border ml-2">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Order</span>
+                </div>
+                <!-- ラジオボタン:Normal -->
+                <div class="form-check form-check-inline pl-2">
+                  <input type="radio" class="form-check-input" id="normalOrder" v-model="rbOrder" value="normalOrder" v-on:change="rbOrderIsChanged">
+                  <label for="normalOrder" class="form-check-label">Normal</label>
+                </div>
+                <!-- ラジオボタン:Reverse -->
+                <div class="form-check form-check-inline pl-0 mr-0">
+                  <input type="radio" class="form-check-input" id="reverseOrder" v-model="rbOrder" value="reverseOrder" v-on:change="rbOrderIsChanged">
+                  <label for="reverseOrder" class="form-check-label ">Reverse</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-auto mt-1 pl-0">
+              <!-- CLEARボタン -->
+              <button type="button" class="btn btn-secondary btn-sm" v-on:click="clearButtonisClicked">CLEAR</button>
+              <!-- SAVEボタン -->
+              <button type="button" class="btn btn-secondary btn-sm" v-on:click="saveButtonisClicked">SAVE</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- LOG body -->
+        <div class="card-body" id="message-monitor-body">
+          <div id="message-list-wrapper">
+            <ul class="list-group" id="message-list" v-on:keyup.stop v-on:keydown.stop>
+              <li class="list-group-item d-flex align-items-start" id="message-monitor-header" tabindex="0">
+                <span class="col1">HH MM SS</span>
+                <span class="col2">DIR</span>
+                <span class="col3">DATA</span>
+              </li>
+              <li v-for="message in message_list" class="list-group-item d-flex align-items-start" v-bind:id="message.id" tabindex="0">
+                <span class="col1">{{ message.timeStamp }}</span>
+                <span class="col2">{{ message.direction }}</span>
+                <span v-if="message.direction === 'REQ'" class="col3">{{ message.body }}</span>
+                <span v-else class="col3">status code: {{ message.statusCode }}<pre>{{ message.body }}</pre></span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>  
+  </script>
+
+  <!-- Template for Setting page-->
+  <script type="text/x-template" id="tmpl-page-setting">
+    <div>
+      <!-- input data -->
+      <div class="card mb-3">
+        <!-- input data header -->
+        <div class="card-header py-1">
+          <div class="row">
+            <div class="col-auto h5 mt-2">ECHONET Lite WebAPI Server の設定</div>
+            <div class="col"></div>
+            <div class="col-auto mt-2"> {{scheme}}://{{elApiServer}}{{prefix}}</div>
+            <div class="col-auto"></div>
+            <!-- 設定保存ボタン -->
+            <div class="col-auto mt-1 pl-0">
+              <button type="button" class="btn btn-secondary btn-sm" v-on:click="saveSettingsButtonIsClicked">設定保存</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- input data body -->
+        <div class="card-body pt-2 pb-2">
+          <form>
+            <div class="form-row">
+              <div class="input-group mb-2 mx-1">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">Scheme</div>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input ml-3" type="radio" id="https" value="https" v-model="scheme">
+                  <label class="form-check-label" for="https">https</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" id="http" value="http" v-model="scheme">
+                  <label class="form-check-label" for="http">http</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="input-group mb-2 mx-1">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">Server name</div>
+                </div>
+                <input type="text" class="form-control" id="inputElApiServer" v-model="elApiServer">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="input-group mb-2 mx-1">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">Prefix</div>
+                </div>
+                <input type="text" class="form-control" id="inputPrefix" v-model="prefix">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="input-group mb-2 mx-1">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">API key</div>
+                </div>
+                <input type="text" class="form-control" id="inputApiKey" v-model="apiKey">
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Devices on the server -->
+      <div class="card">
+        <!-- header-->
+        <div class="card-header py-1">
+          <form>
+            <div class="form-row">
+              <div class="col-auto h5 mt-2">デバイスエミュレーションの設定</div>
+              <div class="col"></div>
+              <div class="col-auto">
+                <select id="selectAddDevice" class="form-control" v-model="addDevice">
+                  <option v-for="device in addDeviceList">{{ device }}</option>
+                </select>  
+              </div>
+              <!-- デバイス追加ボタン -->
+              <div class="col-auto mt-1 pl-0">
+                <button type="button" class="btn btn-secondary btn-sm" v-on:click="addDeviceButtonIsClicked" >デバイス追加</button>
+              </div>            
+              <!-- UPDATEボタン -->
+              <div class="col-auto mt-1 pl-0">
+                <button type="button" class="btn btn-secondary btn-sm" v-on:click="updateButtonIsClicked" >UPDATE</button>
+              </div>            
+            </div>
+          </form>
+        </div>
+
+        <!-- body -->
+        <div class="card-body" id="setting-devices-body">
+          <div id="setting-devices-list-wrapper">
+            <ul class="list-group" id="setting-devices-list">
+              <li class="list-group-item d-flex align-items-start" id="devices-header" tabindex="0">
+                <span class="col1">Device Type</span>
+                <span class="col2">Device Id</span>
+                <span class="col3">削除</span>
+              </li>
+              <li v-for="(idInfo, index) in idInfoList" class="list-group-item d-flex align-items-start" v-bind:id="idInfo.id" tabindex="0">
+                <span class="col1">{{ idInfo.deviceType }}</span>
+                <span class="col2">{{ idInfo.id }}</span>
+                <span class="col3">
+                  <button class="btn btn-secondary btn-sm" type="button" v-on:click="deleteDeviceButtonIsClicked(index)">
+                    <i class="far fa-trash-alt"></i>
+                  </button>
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>  
+  </script>
+
+  <!-- Template for Help page-->
+  <script type="text/x-template" id="tmpl-page-help">
+    <div>
+      <h4>ECHONET Lite WebAPI Toolについて</h4>
+      <p>この Tool は、エコーネットコンソーシアムが策定した
+        <a href=https://echonet.jp/web_api/#guideline target="_blank" rel="noreferrer">ECHONET Lite WebAPI</a>
+        の仕様を理解するためのツールです。<br>
+        エコーネットコンソーシアムが会員向けに運用している実験サーバーへのアクセスを想定しています。<br>
+        実験サーバーについては
+        <a href=https://echonet.jp/m_only/web_api_cloud/ target="_blank" rel="noreferrer">こちらの会員限定ページ</a>を参照ください。
+
+      <h4>apiKeyについて</h4>
+      <p>このツールを使って実験サーバーにアクセスするには、あらかじめユーザー登録を行い、apiKeyの取得が必要です。<br>
+      ユーザー登録は、上記の会員限定ページから行うことができます。<br>
+      この Tool の設定画面でapiKeyを入力したのち、設定保存ボタンをクリックしてください。
+      </p>
+    </div>
+  </script>
+
+  <script src="/lib/jquery-3.3.1.min.js"></script>
+  <script src="/lib/popper.min.js"></script>
+  <script src="/lib/vue.min.js"></script>
+  <script src="/lib/vue-router.min.js"></script>
+  <script src="/elwebapistudy.js"></script>
+
+</body>
+</html>
