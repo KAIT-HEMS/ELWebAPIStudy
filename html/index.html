@@ -173,7 +173,7 @@
 
 
       <div class="row">
-        <!-- Card: Left Window -->
+        <!-- Card: Left Window "Operation" -->
         <div class="card col-6 px-0 mb-3">
           <div class="card-header">
             <h5>Operation</h5>
@@ -182,49 +182,55 @@
 
             <!-- Card: Device -->
             <div class="card col-12 px-0 mb-1">
-              <div class="card-header">
 
+              <div class="card-header">
                 <div class="row">
                   <div class="col-auto pt-1 h5">Device</div>
                   <div class="col"></div>
                   <!-- Get device info ボタン -->
                   <div class="col-auto p-1">
-                    <button type="button" class="btn btn-secondary btn-sm" title="Get device info" v-on:click="sendButtonIsClicked">
+                    <button type="button" class="btn btn-secondary btn-sm" title="GET /devices" v-on:click="getDeviceInfoButtonIsClicked">
                       Get device info
                     </button>
                   </div>
                   <!-- Clear ボタン -->
                   <div class="col-auto p-1">
-                    <button type="button" class="btn btn-secondary btn-sm" title="Clear" v-on:click="sendButtonIsClicked">
+                    <button type="button" class="btn btn-secondary btn-sm" title="Clear" v-on:click="clearDeviceInfoButtonIsClicked">
                       Clear
                     </button>
                   </div>
                 </div>
-      
               </div>
-              <div class="card-body py-1">
-                <div class="row border">
+
+              <div class="card-body py-0">
+                <div class="row border py-0 pl-3 my-0">
+                <!-- <div class="row"> -->
                   <div class="btn-group">
-                    <button type="button" class="btn btn-light" title="lighting" v-on:click="sendButtonIsClicked">
-                      <img src="./graphic/lighting.png">
+                    <button type="button" class="btn btn-light py-0 my-0" title="照明" v-on:click="lightingIsClicked">
+                      <img src="./graphic/lighting1.png" v-if="graphicLighting == 'selected'">
+                      <img src="./graphic/lighting2.png" v-if="graphicLighting == 'notSelected'">
                     </button>
 
-                    <button type="button" class="btn btn-light" title="airCon" v-on:click="sendButtonIsClicked">
-                      <img src="./graphic/airConditioner.png">
+                    <button type="button" class="btn btn-light py-0 my-0" title="エアコン" v-on:click="airconIsClicked">
+                      <img src="./graphic/airConditioner1.png" v-if="graphicAircon == 'selected'">
+                      <img src="./graphic/airConditioner2.png" v-if="graphicAircon == 'notSelected'">
                     </button>
 
-                    <button type="button" class="btn btn-light" title="waterHeater" v-on:click="sendButtonIsClicked">
-                      <img src="./graphic/waterHeater.png">
+                    <button type="button" class="btn btn-light py-0 my-0" title="電気温水器" v-on:click="waterHeaterIsClicked">
+                      <img src="./graphic/waterHeater1.png" v-if="graphicWaterHeater == 'selected'">
+                      <img src="./graphic/waterHeater2.png" v-if="graphicWaterHeater == 'notSelected'">
                     </button>
                   </div>
-                  <div class="col px-0 border">
-                    <ul class="list-group request-response-list">
-                      <li class="list-group-item">id : FE000077029049D</li>
-                      <li class="list-group-item">deviceType: homeAirConditioner</li>
-                      <li class="list-group-item">version: Release M</li>
-                      <li class="list-group-item">manufacturer: 神奈川工科大学</li>
-                    </ul>
-                  </div>
+                </div>
+
+                <!-- <div class="col px-0 border"> -->
+                <div class="col px-0">
+                  <ul class="list-group request-response-list">
+                    <li class="list-group-item">id: {{device_id}}</li>
+                    <li class="list-group-item">deviceType: {{device_deviceType}}</li>
+                    <li class="list-group-item">version: {{device_version}}</li>
+                    <li class="list-group-item">manufacturer: {{device_manufacturer}}</li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -235,9 +241,15 @@
                 <div class="row">
                   <div class="col-auto pt-1 h5">Device description</div>
                   <div class="col"></div>
-                  <!-- Get Device descriptions ボタン -->
+                  <!-- Get device description ボタン -->
                   <div class="col-auto px-0">
-                      <button type="button" class="btn btn-secondary btn-sm" title="Get Device descriptions" v-on:click="sendButtonIsClicked" >Get Device descriptions</button>
+                      <button 
+                        type="button" 
+                        class="btn btn-secondary btn-sm" 
+                        title="GET /devices/<id>" 
+                        v-on:click="getDeviceDescriptionButtonIsClicked" >
+                        Get device description
+                      </button>
                   </div>
                 </div>
               </div>
@@ -276,7 +288,13 @@
                   <div class="col"></div>
                   <!-- Get all property values ボタン -->
                   <div class="col-auto px-0">
-                    <button type="button" class="btn btn-secondary btn-sm" title="Get all property values" v-on:click="sendButtonIsClicked" >Get all property values</button>
+                    <button 
+                      type="button" 
+                      class="btn btn-secondary btn-sm" 
+                      title="Get /devices/<id>/properties" 
+                      v-on:click="getAllPropertyValuesButtonIsClicked" >
+                      Get all property values
+                    </button>
                   </div>
                 </div>
               </div>
@@ -348,65 +366,13 @@
           <div class="card-body request-response-body">
             <div class="request-response-wrapper">
               <ul class="list-group request-response-list">
-                <li class="list-group-item" >REQ GET https://webapiechonet.com/elapi/v1/devices</li>
-                <li class="list-group-item" >RES status code: 200</li>
-                <li class="list-group-item" >
-                <pre>
-    {
-      "devices": [
-        {
-          "id": "FE000077029049CB718F42B2DEF6695A61",
-          "deviceType": "generalLighting",
-          "protocol": {
-            "type": "ECHONET_Lite v1.13",
-            "version": "Rel.M"
-          },
-          "manufacturer": {
-            "code": "0x000077",
-            "descriptions": {
-              "ja": "神奈川工科大学",
-              "en": "Kanagawa Institute of Technology"
-            }
-          }
-        },
-        {
-          "id": "FE000077029049CB718F42B2DEF6695A61",
-          "deviceType": "generalLighting",
-          "protocol": {
-            "type": "ECHONET_Lite v1.13",
-            "version": "Rel.M"
-          },
-          "manufacturer": {
-            "code": "0x000077",
-            "descriptions": {
-              "ja": "神奈川工科大学",
-              "en": "Kanagawa Institute of Technology"
-            }
-          }
-        },
-        {
-          "id": "FE0000770288BA19E5CB60D3BDFBFA838A",
-          "deviceType": "lvSmartElectricEnergyMeter",
-          "protocol": {
-            "type": "ECHONET_Lite v1.13",
-            "version": "Rel.M"
-          },
-          "manufacturer": {
-            "code": "0x000077",
-            "descriptions": {
-              "ja": "神奈川工科大学",
-              "en": "Kanagawa Institute of Technology"
-            }
-          }
-        }
-      ]
-    }
-                  </pre>
-                  </li>
-                </ul>
-              </div>
+                <li class="list-group-item" >{{request}}</li>
+                <li class="list-group-item" >{{statusCode}}</li>
+                <li class="list-group-item" ><pre>{{response}}</pre></li>
+              </ul>
             </div>
           </div>
+
         </div>
 
 

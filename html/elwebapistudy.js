@@ -1,15 +1,15 @@
 // elwebapistudy.js for elwebapistudy(client side)
-// 2020.09.11
+// 2021.01.12
 // Copyright (c) 2020 Kanagawa Institute of Technology, ECHONET Consortium
 // Released under the MIT License.
 // 
-// elwebapistudy.jsは、ECHONET Lite WebAPI Toolのクライアント側JavaScript codeである。
-// サーバーはlocalhost/elwebapistudy
-// サーバー側にECHONET Lite WebAPI Serverの設定がファイルconfig.jsonとして存在する。
+// elwebapistudy.jsは、ELWebApiStudyのクライアント側JavaScript codeである。
+// サーバーはlocalhost:3020/elwebapistudy
+// 設定がファイルはサーバー側にconfig.jsonとして存在する。
+
 'use strict';
 
-const g_serverURL = "/elwebapistudy/";
-// SPAのweb serverのURL
+const g_serverURL = "/elwebapistudy/";　// SPAのweb serverのURL
 let g_dataLogArray = []; // logを格納するarray
 let g_thingInfo = {}; 
 // thing id(device id, group id, bulk id, history id)をkeyとして、以下の項目を保持
@@ -31,12 +31,26 @@ let bind_data = {
   apiKey: "",
   prefix: "",
 
+  lighting: {},
+  aircon: {},
+  waterHeater: {},
+
   // Home page, input and control
+  deviceSelected: "",
+  graphicLighting: "off",
+  graphicAircon: "off",
+  graphicWaterHeater: "off",
+  device_id: "",
+  device_deviceType: "",
+  device_version: "",
+  device_manufacturer: "",
+
   methodList: ["GET", "PUT", "POST", "DELETE"],
   methodSelected: "GET",
   serviceList: [""], // [/devices, /groups]
   serviceSelected: "",
-  idInfoList: [], // [{deviceType:"/aircon", id:"0123"},... ] GET /devices, groups, bulk, histories のレスポンスを利用
+  idInfoList: [], // [{deviceType:"/aircon", id:"0123", version:"Rel.M", manufacturer:"神奈川工科大学"},... ] 
+                  // GET /devices, groups, bulk, histories のレスポンスを利用
   idSelected: "",
   idToolTip: "XXX",
   deviceType: "",
@@ -105,6 +119,83 @@ const template_home = {
   template:'#tmpl-page-home',
   data:() => {return (bind_data);},
   methods: {
+    getDeviceInfoButtonIsClicked: function () {
+      console.log("getDeviceInfo ボタンがクリックされました。");
+      g_flagSendButtonIsClicked = true;
+      const message = accessElServer(this.scheme, this.elApiServer, this.apiKey, 
+        this.methodSelected, this.prefix, "/devices", "", "", "", "", "");
+      // REQUEST表示エリアのデータ設定
+      this.request = "REQ " + message.method + " " + this.scheme + "://" + 
+                    message.hostname + message.path + " " + this.body;
+    },
+    clearDeviceInfoButtonIsClicked: function () {
+      console.log("clearDeviceInfo ボタンがクリックされました。");
+      this.deviceSelected = "";
+      this.graphicLighting = "off";
+      this.graphicAircon = "off";
+      this.graphicWaterHeater = "off";
+      this.device_id = "";
+      this.device_deviceType = "";
+      this.device_version = "";
+      this.device_manufacturer = "";
+    },
+    lightingIsClicked: function () {
+      console.log("照明が選択されました。");
+      this.deviceSelected = "lighting";
+      this.graphicLighting = "selected";
+      this.graphicAircon = "notSelected";
+      this.graphicWaterHeater = "notSelected";
+      this.device_id = this.lighting.id;
+      this.device_deviceType = this.lighting.deviceType;
+      this.device_version = this.lighting.version;
+      this.device_manufacturer = this.lighting.manufacturer;
+    },
+    airconIsClicked: function () {
+      console.log("エアコンが選択されました。");
+      this.deviceSelected = "aircon";
+      this.graphicLighting = "notSelected";
+      this.graphicAircon = "selected";
+      this.graphicWaterHeater = "notSelected";
+      this.device_id = this.aircon.id;
+      this.device_deviceType = this.aircon.deviceType;
+      this.device_version = this.aircon.version;
+      this.device_manufacturer = this.aircon.manufacturer;
+    },
+    waterHeaterIsClicked: function () {
+      console.log("温水器が選択されました。");
+      this.deviceSelected = "waterHeater";
+      this.graphicLighting = "notSelected";
+      this.graphicAircon = "notSelected";
+      this.graphicWaterHeater = "selected";
+      this.device_id = this.waterHeater.id;
+      this.device_deviceType = this.waterHeater.deviceType;
+      this.device_version = this.waterHeater.version;
+      this.device_manufacturer = this.waterHeater.manufacturer;
+    },
+    getDeviceDescriptionButtonIsClicked: function () {
+      console.log("getDeviceDescription ボタンがクリックされました。");
+      if (this.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(this.scheme, this.elApiServer, this.apiKey, 
+          this.methodSelected, this.prefix, "/devices", "/"+this.device_id, "", "", "", "");
+        // REQUEST表示エリアのデータ設定
+        this.request = "REQ " + message.method + " " + this.scheme + "://" + 
+                      message.hostname + message.path + " " + this.body;  
+      }
+    },
+    getAllPropertyValuesButtonIsClicked: function () {
+      console.log("getAllPropertyValues ボタンがクリックされました。");
+    },
+    setAirconOperationStatusOnButtonIsClicked: function () {
+      console.log("setAirconOperationStatusOn ボタンがクリックされました。");
+    },
+    setAirconOperationStatusOffButtonIsClicked: function () {
+      console.log("setAirconOperationStatusOn ボタンがクリックされました。");
+    },
+    getAirconOperationStatusButtonIsClicked: function () {
+      console.log("getAirconOperationStatus ボタンがクリックされました。");
+    },
+
     // SENDボタンがクリックされたときの処理
     sendButtonIsClicked: function () {
       console.log("SENDボタンがクリックされました。");
@@ -486,7 +577,7 @@ request.send();
 ws.onmessage = function(event){
   const obj = JSON.parse(event.data);
   console.log("Web socketの受信:", obj);
-  console.log(" REQ: " + obj.method + " https://" + obj.hostname + "/",obj.path );
+  console.log(" REQ: " + obj.method + " https://" + obj.hostname + obj.path );
   console.log(" path:", obj.path);
   console.log(" status code:", obj.statusCode);
   console.log(" response:", obj.response);
@@ -546,12 +637,44 @@ ws.onmessage = function(event){
     service = "histories";
   }
   if (service !== "") {
-    vm.idInfoList = [{deviceType:"", id:""}];
+    vm.idInfoList = [{deviceType:"", id:"", version:"", manufacturer:""}];
     if (obj.response[service] !== undefined) {
       for (let thing of obj.response[service]) {
         const deviceType = (thing.deviceType !== undefined) ? thing.deviceType : "";
-        const idInfo = { id:"/" + thing.id, deviceType:deviceType };
+        const idInfo = { 
+          id:"/" + thing.id, 
+          deviceType:deviceType, 
+          version:thing.protocol.version, 
+          manufacturer:thing.manufacturer.descriptions.ja
+        };
         vm.idInfoList.push(idInfo);
+
+        // Addition for elwebapistudy
+        if (deviceType == "generalLighting") {
+          vm.lighting = { 
+            id:thing.id, 
+            deviceType:deviceType, 
+            version:thing.protocol.version, 
+            manufacturer:thing.manufacturer.descriptions.ja
+          };
+          vm.graphicLighting = "notSelected";
+        } else if (deviceType == "homeAirConditioner") {
+          vm.aircon = { 
+            id:thing.id, 
+            deviceType:deviceType, 
+            version:thing.protocol.version, 
+            manufacturer:thing.manufacturer.descriptions.ja
+          };
+          vm.graphicAircon = "notSelected";
+        } else if (deviceType == "electricWaterHeater") {
+          vm.waterHeater = { 
+            id:thing.id, 
+            deviceType:deviceType, 
+            version:thing.protocol.version, 
+            manufacturer:thing.manufacturer.descriptions.ja
+          };
+          vm.graphicWaterHeater = "notSelected";
+        }
       }
     }
 
@@ -597,8 +720,6 @@ ws.onmessage = function(event){
     service = "histories";
   }
 
-  // regex = /\/devices\/([0-9]|[a-z]|[A-Z])+$/; // 正規表現'/devices/'の後、行末まで英数字
-  // if (regex.test(obj.path)) {
   if (service !== "") {
     const pathElements = obj.path.split('/');  // pathを'/'で分割して要素を配列にする
     const thingId = pathElements[pathElements.length - 1];  // 配列の最後の要素が deviceId

@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
 // index.js for ELWebAPIStudy
-// 2020.12.23
-// Copyright (c) 2020 Kanagawa Institute of Technology, ECHONET Consortium
+// 2021.01.12
+// Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium
 // Released under the MIT License.
 // access http://localhost:3020/elwebapistudy
  
 'use strict';
 
-const VERSION = "1.0.0 rev.20200911";
+const VERSION = "0.1.0 rev.20210112";
 const portNumber = 3020;
 
 let express = require('express');
