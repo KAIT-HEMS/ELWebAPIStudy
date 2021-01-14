@@ -31,11 +31,13 @@ let bind_data = {
   apiKey: "",
   prefix: "",
 
+
+  // Home page, input and control
   lighting: {},
   aircon: {},
   waterHeater: {},
+  propertyInfoArray: [],  // [{propertyName:string, description:string, writable:boolean}, {}]
 
-  // Home page, input and control
   deviceSelected: "",
   graphicLighting: "off",
   graphicAircon: "off",
@@ -138,6 +140,7 @@ const template_home = {
       this.device_deviceType = "";
       this.device_version = "";
       this.device_manufacturer = "";
+      this.propertyInfoArray = [];
     },
     lightingIsClicked: function () {
       console.log("照明が選択されました。");
@@ -149,6 +152,7 @@ const template_home = {
       this.device_deviceType = this.lighting.deviceType;
       this.device_version = this.lighting.version;
       this.device_manufacturer = this.lighting.manufacturer;
+      this.propertyInfoArray = this.lighting.propertyInfoArray;
     },
     airconIsClicked: function () {
       console.log("エアコンが選択されました。");
@@ -160,6 +164,7 @@ const template_home = {
       this.device_deviceType = this.aircon.deviceType;
       this.device_version = this.aircon.version;
       this.device_manufacturer = this.aircon.manufacturer;
+      this.propertyInfoArray = this.aircon.propertyInfoArray;
     },
     waterHeaterIsClicked: function () {
       console.log("温水器が選択されました。");
@@ -171,6 +176,7 @@ const template_home = {
       this.device_deviceType = this.waterHeater.deviceType;
       this.device_version = this.waterHeater.version;
       this.device_manufacturer = this.waterHeater.manufacturer;
+      this.propertyInfoArray = this.waterHeater.propertyInfoArray;
     },
     getDeviceDescriptionButtonIsClicked: function () {
       console.log("getDeviceDescription ボタンがクリックされました。");
@@ -195,6 +201,14 @@ const template_home = {
     getAirconOperationStatusButtonIsClicked: function () {
       console.log("getAirconOperationStatus ボタンがクリックされました。");
     },
+    clearReqAndResButtonIsClicked: function () {
+      console.log("clearReqAndRes ボタンがクリックされました。");
+      this.request = "request:";
+      this.statusCode = "response: status code";
+      this.response = "response: data";
+    },
+
+    
 
     // SENDボタンがクリックされたときの処理
     sendButtonIsClicked: function () {
@@ -659,7 +673,7 @@ ws.onmessage = function(event){
           };
           vm.graphicLighting = "notSelected";
         } else if (deviceType == "homeAirConditioner") {
-          vm.aircon = { 
+          vm.aircon = {
             id:thing.id, 
             deviceType:deviceType, 
             version:thing.protocol.version, 
@@ -778,6 +792,28 @@ ws.onmessage = function(event){
 
     // 入力フィールドidの下のdeviceTypeの更新
     vm.deviceType = obj.response.deviceType;
+
+    // Addition for elwebapistudy
+    const deviceDescription = obj.response;
+    // console.log("deviceDescription:",deviceDescription);
+    // deviceDescription.properties から key を取り出す
+    const propertyNameArray = Object.keys(deviceDescription.properties);
+    vm.propertyInfoArray = [];
+    for (const propertyName of propertyNameArray) {
+      const description = deviceDescription.properties[propertyName].descriptions.ja;
+      const writable = deviceDescription.properties[propertyName].writable;
+      vm.propertyInfoArray.push({propertyName:propertyName, description:description, writable:writable});
+    }
+    console.log("propertyInfoArray:",vm.propertyInfoArray);
+    if (vm.deviceType == "homeAirConditioner"){
+      vm.aircon.propertyInfoArray = vm.propertyInfoArray;
+    }
+    else if (vm.deviceType == "generalLighting"){
+      vm.lighting.propertyInfoArray = vm.propertyInfoArray;
+    }
+    else if (vm.deviceType == "electricWaterHeater"){
+      vm.waterHeater.propertyInfoArray = vm.propertyInfoArray;
+    }
   }
   
   g_flagSendButtonIsClicked = false;

@@ -51,24 +51,27 @@
       margin: 0;
       padding: 0;
     }
-    #message-list-wrapper {
-      height: 30em;
+    #deviceDescription-wrapper {
+      height: 12em;
       overflow-y: scroll;
     }
-    #message-list li {
+    #deviceDescription-list li {
       font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
       font-size: 90%;
       padding: 0.2em 1em;
       cursor: pointer;
     }
-    #message-list li span {
+    #deviceDescription-list li span {
       display: inline-block;
     }
-    #message-list li span.col1 {
-      width: 5em;
+    #deviceDescription-list li span.col1 {
+      width: 15em;
     }
-    #message-list li span.col2 {
-      width: 3em;
+    #deviceDescription-list li span.col2 {
+      width: 15em;
+    }
+    #deviceDescription-list-header {
+      font-weight: bold;
     }
     #setting-devices-body {
       margin: 0;
@@ -176,7 +179,18 @@
         <!-- Card: Left Window "Operation" -->
         <div class="card col-6 px-0 mb-3">
           <div class="card-header">
-            <h5>Operation</h5>
+            <div class="row">
+              <div class="pl-3 pt-1">
+                <h5>Operation</h5>
+              </div>
+              <div class="col"></div>
+              <!-- Clear ボタン -->
+              <div class="col-auto p-1">
+                <button type="button" class="btn btn-secondary btn-sm" title="Clear" v-on:click="clearDeviceInfoButtonIsClicked">
+                  Clear
+                </button>
+              </div>
+            </div>
           </div>
           <div class="card-body p-2">
 
@@ -193,30 +207,44 @@
                       Get device info
                     </button>
                   </div>
-                  <!-- Clear ボタン -->
-                  <div class="col-auto p-1">
-                    <button type="button" class="btn btn-secondary btn-sm" title="Clear" v-on:click="clearDeviceInfoButtonIsClicked">
-                      Clear
-                    </button>
-                  </div>
                 </div>
               </div>
 
               <div class="card-body py-0">
-                <div class="row border py-0 pl-3 my-0">
-                <!-- <div class="row"> -->
+                <div class="row py-0 pl-3 my-0">
+                  <div>
+                    <img src="./graphic/placeholder.png" v-if="graphicLighting == 'off'">
+                  </div>
                   <div class="btn-group">
-                    <button type="button" class="btn btn-light py-0 my-0" title="照明" v-on:click="lightingIsClicked">
+                    <button 
+                      type="button" 
+                      class="btn btn-light py-0 my-0" 
+                      title="照明" 
+                      v-on:click="lightingIsClicked"
+                      v-if="graphicLighting !== 'off'"
+                    >
                       <img src="./graphic/lighting1.png" v-if="graphicLighting == 'selected'">
                       <img src="./graphic/lighting2.png" v-if="graphicLighting == 'notSelected'">
                     </button>
 
-                    <button type="button" class="btn btn-light py-0 my-0" title="エアコン" v-on:click="airconIsClicked">
+                    <button 
+                      type="button" 
+                      class="btn btn-light py-0 my-0" 
+                      title="エアコン" 
+                      v-on:click="airconIsClicked"
+                      v-if="graphicAircon !== 'off'"
+                    >
                       <img src="./graphic/airConditioner1.png" v-if="graphicAircon == 'selected'">
                       <img src="./graphic/airConditioner2.png" v-if="graphicAircon == 'notSelected'">
                     </button>
 
-                    <button type="button" class="btn btn-light py-0 my-0" title="電気温水器" v-on:click="waterHeaterIsClicked">
+                    <button 
+                      type="button" 
+                      class="btn btn-light py-0 my-0" 
+                      title="電気温水器" 
+                      v-on:click="waterHeaterIsClicked"
+                      v-if="graphicWaterHeater !== 'off'"
+                    >
                       <img src="./graphic/waterHeater1.png" v-if="graphicWaterHeater == 'selected'">
                       <img src="./graphic/waterHeater2.png" v-if="graphicWaterHeater == 'notSelected'">
                     </button>
@@ -255,28 +283,22 @@
               </div>
 
               <div class="card-body py-0">
-                <table class="table table-sm m-0">
-                  <thead>
-                    <th>property name</th>
-                    <th>description</th>
-                    <th>data type</th>
-                  </thead>
-                  <tr>
-                    <td>operationStatus</td>
-                    <td>動作状態</td>
-                    <td>string</td>
-                  </tr>
-                  <tr>
-                    <td>operationMode</td>
-                    <td>運転モード</td>
-                    <td>string</td>
-                  </tr>
-                  <tr>
-                    <td>targetTemperature</td>
-                    <td>温度設定値</td>
-                    <td>number</td>
-                  </tr>
-                </table>
+
+                <div id="deviceDescription-wrapper">
+                  <ul class="list-group" id="deviceDescription-list">
+                    <li class="list-group-item d-flex align-items-start" id="deviceDescription-list-header">
+                      <span class="col1">property name</span>
+                      <span class="col2">description</span>
+                      <span class="col3">writable</span>
+                    </li>
+                    <li v-for="propertyInfo in propertyInfoArray" class="list-group-item d-flex align-items-start">
+                      <span class="col1">{{ propertyInfo.propertyName }}</span>
+                      <span class="col2">{{ propertyInfo.description }}</span>
+                      <span class="col3">{{ propertyInfo.writable }}</span>
+                    </li>
+                  </ul>
+                </div>
+
               </div>
             </div>
 
@@ -360,7 +382,18 @@
         <!-- Card: Right Window -->
         <div class="card col-6 px-0 mb-3">
           <div class="card-header">
-            <h5>Request & Response</h5>
+            <div class="row">
+              <div class="pl-3 pt-1">
+                <h5>Request & Response</h5>
+              </div>
+              <div class="col"></div>
+              <!-- Clear ボタン -->
+              <div class="col-auto p-1">
+                <button type="button" class="btn btn-secondary btn-sm" title="Clear" v-on:click="clearReqAndResButtonIsClicked">
+                  Clear
+                </button>
+              </div>
+            </div>
           </div>
 
           <div class="card-body request-response-body">
@@ -475,6 +508,13 @@
         <div class="card-header py-1">
           <div class="row">
             <div class="col-auto h5 mt-2">Request & Response</div>
+            <div class="col"></div>
+            <!-- Clear ボタン -->
+            <div class="col-auto p-1">
+              <button type="button" class="btn btn-secondary btn-sm" title="Clear" v-on:click="clearReqAndResButtonIsClicked">
+                Clear
+              </button>
+            </div>
           </div>
         </div>
 
