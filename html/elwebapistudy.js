@@ -31,7 +31,6 @@ let bind_data = {
   apiKey: "",
   prefix: "",
 
-
   // Home page, input and control
   lighting: {},
   aircon: {},
@@ -120,6 +119,11 @@ let bind_data = {
 const template_home = {
   template:'#tmpl-page-home',
   data:() => {return (bind_data);},
+  computed: {
+    selectedDeviceComponent: function() {
+      return "ctrl-" + this.deviceSelected;
+    }
+  },
   methods: {
     getDeviceInfoButtonIsClicked: function () {
       console.log("getDeviceInfo ボタンがクリックされました。");
@@ -551,6 +555,202 @@ function updateResourceName(methodSelected, idSelected, resourceTypeSelected) {
     }
   }
 }
+
+Vue.component("ctrl-lighting", {
+  methods: {
+    sendButtonIsClicked: function () {
+      console.log("SENDボタンがクリックされました。");
+    }
+  },
+  template: `
+  <div>
+    <table class="table table-sm m-0">
+      <thead>
+        <th>プロパティ名</th>
+        <th>設定</th>
+        <th>値取得</th>
+      </thead>
+      <tr>
+        <td>動作状態</td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="ON" v-on:click="sendButtonIsClicked" >ON</button>
+          <button type="button" class="btn btn-secondary btn-sm" title="OFF" v-on:click="sendButtonIsClicked" >OFF</button>
+        </td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="sendButtonIsClicked">Get value</button>
+          ON
+        </td>
+      </tr>
+      <tr>
+        <td>点灯モード</td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="normal" v-on:click="sendButtonIsClicked" >通常灯</button>
+          <button type="button" class="btn btn-secondary btn-sm" title="night" v-on:click="sendButtonIsClicked" >常夜灯</button>
+          <button type="button" class="btn btn-secondary btn-sm" title="color" v-on:click="sendButtonIsClicked" >カラー灯</button>
+        </td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="sendButtonIsClicked">Get value</button>
+          暖房
+        </td>
+      </tr>
+      <tr>
+        <td>照度レベル設定値</td>
+        <td>
+          <div class="row">
+            <input id="slider-1" type="range" value="50" min="0" max="100" >
+            <div class="slider-value" id="realTimeValue" >50%</div>
+          </div>
+        </td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="sendButtonIsClicked">Get value</button>
+          26℃
+        </td>
+      </tr>
+    </table>
+  </div>
+  `
+});
+Vue.component("ctrl-aircon", {
+  // props: ['modelValue'],
+  data: function () {
+    return {
+      count: 25
+    }
+  },
+  computed: {
+    inputValue: {
+      get() {
+        return this.count;
+      },
+      set(value) {
+        console.log(value);
+        this.count = value;
+        // this.$emit('update:modelValue', value);
+      }
+    }
+  },
+  methods: {
+    getOperationStatus: function () {
+      console.log("getOperationStatusがクリックされました。");
+    },
+    setOperationStatus: function (arg) {
+      console.log("setOperationStatusがクリックされました。",arg);
+    },
+    getOperationMode: function () {
+      console.log("getOperationModeがクリックされました。");
+    },
+    setOperationMode: function (arg) {
+      console.log("setOperationModeがクリックされました。",arg);
+    },
+    getTargetTemperature: function () {
+      console.log("getTargetTemperatureがクリックされました。", this.inputValue);
+    },
+    setTargetTemperature: function (arg) {
+      console.log("setTargetTemperatureがクリックされました。",arg);
+    }
+  },
+  template: `
+  <div>
+    <table class="table table-sm m-0">
+      <thead>
+        <th>プロパティ名</th>
+        <th>設定</th>
+        <th>値取得</th>
+      </thead>
+      <tr>
+        <td>動作状態</td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="ON" v-on:click="setOperationStatus('true')" >ON</button>
+          <button type="button" class="btn btn-secondary btn-sm" title="OFF" v-on:click="setOperationStatus('false')" >OFF</button>
+        </td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getOperationStatus">Get value</button>
+          ON
+        </td>
+      </tr>
+      <tr>
+        <td>運転モード</td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="冷房" v-on:click="setOperationMode('cooling')" >冷房</button>
+          <button type="button" class="btn btn-secondary btn-sm" title="暖房" v-on:click="setOperationMode('heating')" >暖房</button>
+          <button type="button" class="btn btn-secondary btn-sm" title="送風" v-on:click="setOperationMode('circulation')" >送風</button>
+        </td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getOperationMode">Get value</button>
+          暖房
+        </td>
+      </tr>
+      <tr>
+        <td>温度設定値</td>
+        <td>
+          <div class="row">
+            <input id="slider-1" v-model="inputValue" type="range" value="50" min="0" max="100" >
+            <div class="slider-value" id="realTimeValue" >{{inputValue}}℃</div>
+          </div>
+        </td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getTargetTemperature">Get value</button>
+          26℃
+        </td>
+      </tr>
+    </table>
+  </div>
+  `
+});
+Vue.component("ctrl-waterHeater", {
+  methods: {
+    sendButtonIsClicked: function () {
+      console.log("SENDボタンがクリックされました。");
+    }
+  },
+  template: `
+  <div>
+    <table class="table table-sm m-0">
+      <thead>
+        <th>プロパティ名</th>
+        <th>設定</th>
+        <th>値取得</th>
+      </thead>
+      <tr>
+        <td>動作状態</td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="ON" v-on:click="sendButtonIsClicked" >ON</button>
+          <button type="button" class="btn btn-secondary btn-sm" title="OFF" v-on:click="sendButtonIsClicked" >OFF</button>
+        </td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="sendButtonIsClicked">Get value</button>
+          ON
+        </td>
+      </tr>
+      <tr>
+        <td>タンク運転モード</td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="standard" v-on:click="sendButtonIsClicked" >標準</button>
+          <button type="button" class="btn btn-secondary btn-sm" title="saving" v-on:click="sendButtonIsClicked" >節約</button>
+          <button type="button" class="btn btn-secondary btn-sm" title="extra" v-on:click="sendButtonIsClicked" >多め</button>
+        </td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="sendButtonIsClicked">Get value</button>
+          暖房
+        </td>
+      </tr>
+      <tr>
+        <td>沸き上げ湯温設定値</td>
+        <td>
+          <div class="row">
+            <input id="slider-1" type="range" value="50" min="0" max="100" >
+            <div class="slider-value" id="realTimeValue" >24℃</div>
+          </div>
+        </td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="sendButtonIsClicked">Get value</button>
+          26℃
+        </td>
+      </tr>
+    </table>
+  </div>
+  `
+});
 
 // Vueのインスタンス作成
 let vm = new Vue({
