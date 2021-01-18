@@ -37,6 +37,10 @@ let bind_data = {
   waterHeater: {},
   propertyInfoArray: [],  // [{propertyName:string, description:string, writable:boolean}, {}]
 
+  airconOperationStatus: "AOS",
+  airconOperationMode: "AOM",
+  airconTargetTemperature: "ATT",
+
   deviceSelected: "",
   graphicLighting: "off",
   graphicAircon: "off",
@@ -556,6 +560,7 @@ function updateResourceName(methodSelected, idSelected, resourceTypeSelected) {
   }
 }
 
+// Home画面Left window - Property section - 照明
 Vue.component("ctrl-lighting", {
   methods: {
     sendButtonIsClicked: function () {
@@ -598,7 +603,7 @@ Vue.component("ctrl-lighting", {
         <td>
           <div class="row">
             <input id="slider-1" type="range" value="50" min="0" max="100" >
-            <div class="slider-value" id="realTimeValue" >50%</div>
+            <div class="slider-value">50%</div>
           </div>
         </td>
         <td>
@@ -610,31 +615,59 @@ Vue.component("ctrl-lighting", {
   </div>
   `
 });
+
+// Home画面Left window - Property section - エアコン
 Vue.component("ctrl-aircon", {
   // props: ['modelValue'],
   data: function () {
     return {
-      count: 25
+      temperature: 25
     }
   },
   computed: {
-    inputValue: {
+    operationStatus: {
       get() {
-        return this.count;
+        return vm.airconOperationStatus;
+      },
+      set() {
+        this.operationStatus = vm.airconOperationStatus;
+      }
+    },
+    airconTemperature: {
+      get() {
+        return this.temperature;
       },
       set(value) {
-        console.log(value);
-        this.count = value;
-        // this.$emit('update:modelValue', value);
+        // console.log(value);
+        this.temperature = value;
       }
     }
   },
   methods: {
     getOperationStatus: function () {
       console.log("getOperationStatusがクリックされました。");
+      vm.methodSelected = "GET";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", "");
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + vm.body;
+      }
     },
     setOperationStatus: function (arg) {
       console.log("setOperationStatusがクリックされました。",arg);
+      const body = '{"operationStatus":' + arg + '}';
+      vm.methodSelected = "PUT";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", body);
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + arg;
+      }
     },
     getOperationMode: function () {
       console.log("getOperationModeがクリックされました。");
@@ -643,10 +676,10 @@ Vue.component("ctrl-aircon", {
       console.log("setOperationModeがクリックされました。",arg);
     },
     getTargetTemperature: function () {
-      console.log("getTargetTemperatureがクリックされました。", this.inputValue);
+      console.log("getTargetTemperatureがクリックされました。");
     },
-    setTargetTemperature: function (arg) {
-      console.log("setTargetTemperatureがクリックされました。",arg);
+    setTargetTemperature: function () {
+      console.log("setTargetTemperatureがクリックされました。", this.airconTemperature);
     }
   },
   template: `
@@ -665,7 +698,7 @@ Vue.component("ctrl-aircon", {
         </td>
         <td>
           <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getOperationStatus">Get value</button>
-          ON
+          {{operationStatus}}
         </td>
       </tr>
       <tr>
@@ -677,26 +710,27 @@ Vue.component("ctrl-aircon", {
         </td>
         <td>
           <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getOperationMode">Get value</button>
-          暖房
         </td>
       </tr>
       <tr>
         <td>温度設定値</td>
         <td>
           <div class="row">
-            <input id="slider-1" v-model="inputValue" type="range" value="50" min="0" max="100" >
-            <div class="slider-value" id="realTimeValue" >{{inputValue}}℃</div>
-          </div>
+            <input id="slider-1" v-model="airconTemperature" type="range" value="50" min="0" max="100" >
+            <div class="slider-value" >{{airconTemperature}}℃</div>
+            <button type="button" class="btn btn-secondary btn-sm ml-1" title="設定" v-on:click="setTargetTemperature" >設定</button>
+            </div>
         </td>
         <td>
           <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getTargetTemperature">Get value</button>
-          26℃
         </td>
       </tr>
     </table>
   </div>
   `
 });
+
+// Home画面Left window - Property section - 温水器
 Vue.component("ctrl-waterHeater", {
   methods: {
     sendButtonIsClicked: function () {
@@ -739,7 +773,7 @@ Vue.component("ctrl-waterHeater", {
         <td>
           <div class="row">
             <input id="slider-1" type="range" value="50" min="0" max="100" >
-            <div class="slider-value" id="realTimeValue" >24℃</div>
+            <div class="slider-value >24℃</div>
           </div>
         </td>
         <td>
@@ -1014,6 +1048,30 @@ ws.onmessage = function(event){
     else if (vm.deviceType == "electricWaterHeater"){
       vm.waterHeater.propertyInfoArray = vm.propertyInfoArray;
     }
+  }
+
+  // GET /elapi/v1/devices, groups, bulks, histories/<id>/properties
+  service = "";
+  regex = /\/properties$/; // 正規表現：行末が'/properties'
+  if (regex.test(obj.path)) {
+    console.log("response is /properties");
+  }
+
+  // GET /elapi/v1/devices, groups, bulks, histories/<id>/properties/<property>
+  service = "";
+  regex = /\/properties\/([0-9]|[a-z]|[A-Z])+$/; // 正規表現'/properties/'の後、行末まで英数字
+  if (regex.test(obj.path)) {
+    console.log("response is /properties/<property>", vm.deviceType);
+    if (vm.deviceType == "homeAirConditioner"){
+      console.log("response is property value for aircon");
+    }
+    else if (vm.deviceType == "generalLighting"){
+      console.log("response is property value for lighting");
+    }
+    else if (vm.deviceType == "electricWaterHeater"){
+      console.log("response is property value for waterHeater");
+    }
+
   }
   
   g_flagSendButtonIsClicked = false;
