@@ -40,6 +40,13 @@ let bind_data = {
   airconOperationStatus: "",
   airconOperationMode: "",
   airconTargetTemperature: "",
+  lightingOperationStatus: "",
+  lightingOperationMode: "",
+  lightingBrightness: "",
+  waterHeaterOperationStatus: "",
+  waterHeaterTankOperationMode: "",
+  waterHeaterTargetWaterHeatingTemperature: "",
+
 
   deviceSelected: "",
   graphicLighting: "off",
@@ -129,7 +136,20 @@ const template_home = {
       if (this.propertyInfoArray) {
         return "ctrl-" + this.deviceSelected;
       }
+    },
+    operationGuide: function() {
+      if (this.idInfoList.length == 0) {
+        return "Get device info ボタンをクリックしてください";
+      }
+      if (this.deviceSelected == '') {
+        return "デバイスのアイコンをクリックしてください";
+      }
+      if (this.propertyInfoArray === undefined){
+        return "Get device descriptionボタンをクリックしてください";
+      }
+      return "Property の設定や値取得を実行してください";
     }
+
   },
   methods: {
     getDeviceInfoButtonIsClicked: function () {
@@ -147,6 +167,7 @@ const template_home = {
       this.graphicLighting = "off";
       this.graphicAircon = "off";
       this.graphicWaterHeater = "off";
+      this.idInfoList = [];
       this.device_id = "";
       this.device_deviceType = "";
       this.device_version = "";
@@ -576,9 +597,121 @@ function updateResourceName(methodSelected, idSelected, resourceTypeSelected) {
 
 // Home画面Left window - Property section - 照明
 Vue.component("ctrl-lighting", {
+  data: function () {
+    return {
+      brightnessValue: 30
+    }
+  },
+  computed: {
+    operationStatus: {
+      get() {
+        return vm.lightingOperationStatus;
+      },
+      set() {
+        this.operationStatus = vm.lightingOperationStatus;
+      }
+    },
+    operationMode: {
+      get() {
+        return vm.lightingOperationMode;
+      },
+      set() {
+        this.operationMode = vm.lightingOperationMode;
+      }
+    },
+    brightness: {
+      get() {
+        return vm.lightingBrightness;
+      },
+      set() {
+        this.brightness = vm.lightingBrightness;
+      }
+    },
+    lightingBrightness: {
+      get() {
+        return this.brightnessValue;
+      },
+      set(value) {
+        // console.log(value);
+        this.brightnessValue = value;
+      }
+    }
+  },
   methods: {
-    sendButtonIsClicked: function () {
-      console.log("SENDボタンがクリックされました。");
+    getOperationStatus: function () {
+      console.log("getOperationStatusがクリックされました。");
+      vm.methodSelected = "GET";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", "");
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + vm.body;
+      }
+    },
+    setOperationStatus: function (arg) {
+      console.log("setOperationStatusがクリックされました。",arg);
+      const body = '{"operationStatus":' + arg + '}';
+      vm.methodSelected = "PUT";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", body);
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + arg;
+      }
+    },
+    getOperationMode: function () {
+      console.log("getOperationModeがクリックされました。");
+      vm.methodSelected = "GET";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationMode", "", "");
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + vm.body;
+      }
+    },
+    setOperationMode: function (arg) {
+      console.log("setOperationModeがクリックされました。",arg);
+      const body = '{"operationMode":"' + arg + '"}';
+      vm.methodSelected = "PUT";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationMode", "", body);
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + arg;
+      }
+    },
+    getBrightness: function () {
+      console.log("getBrightnessがクリックされました。");
+      vm.methodSelected = "GET";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/brightness", "", "");
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + vm.body;
+      }
+    },
+    setBrightness: function () {
+      console.log("setBrightnessがクリックされました。", this.lightingBrightness);
+      const body = '{"brightness":' + this.lightingBrightness + '}';
+      vm.methodSelected = "PUT";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/brightness", "", body);
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + this.lightingBrightness;
+      }
     }
   },
   template: `
@@ -592,37 +725,38 @@ Vue.component("ctrl-lighting", {
       <tr>
         <td>動作状態</td>
         <td>
-          <button type="button" class="btn btn-secondary btn-sm" title="ON" v-on:click="sendButtonIsClicked" >ON</button>
-          <button type="button" class="btn btn-secondary btn-sm" title="OFF" v-on:click="sendButtonIsClicked" >OFF</button>
-        </td>
+        <button type="button" class="btn btn-secondary btn-sm" title="ON" v-on:click="setOperationStatus('true')" >ON</button>
+        <button type="button" class="btn btn-secondary btn-sm" title="OFF" v-on:click="setOperationStatus('false')" >OFF</button>
+      </td>
         <td>
-          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="sendButtonIsClicked">Get value</button>
-          ON
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getOperationStatus">Get value</button>
+          {{operationStatus}}
         </td>
       </tr>
       <tr>
         <td>点灯モード</td>
         <td>
-          <button type="button" class="btn btn-secondary btn-sm" title="normal" v-on:click="sendButtonIsClicked" >通常灯</button>
-          <button type="button" class="btn btn-secondary btn-sm" title="night" v-on:click="sendButtonIsClicked" >常夜灯</button>
-          <button type="button" class="btn btn-secondary btn-sm" title="color" v-on:click="sendButtonIsClicked" >カラー灯</button>
+          <button type="button" class="btn btn-secondary btn-sm" title="normal" v-on:click="setOperationMode('normal')" >通常灯</button>
+          <button type="button" class="btn btn-secondary btn-sm" title="night" v-on:click="setOperationMode('night')" >常夜灯</button>
+          <button type="button" class="btn btn-secondary btn-sm" title="color" v-on:click="setOperationMode('color')" >カラー灯</button>
         </td>
         <td>
-          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="sendButtonIsClicked">Get value</button>
-          暖房
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getOperationMode">Get value</button>
+          {{operationMode}}
         </td>
       </tr>
       <tr>
         <td>照度レベル設定値</td>
         <td>
           <div class="row">
-            <input id="slider-1" type="range" value="50" min="0" max="100" >
-            <div class="slider-value">50%</div>
+            <input v-model="lightingBrightness" type="range" value="40" min="0" max="100" >
+            <div class="slider-value" >{{lightingBrightness}}%</div>
+            <button type="button" class="btn btn-secondary btn-sm ml-1" title="設定" v-on:click="setBrightness" >設定</button>
           </div>
         </td>
         <td>
-          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="sendButtonIsClicked">Get value</button>
-          26℃
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getBrightness">Get value</button>
+          {{brightness}}
         </td>
       </tr>
     </table>
@@ -632,7 +766,6 @@ Vue.component("ctrl-lighting", {
 
 // Home画面Left window - Property section - エアコン
 Vue.component("ctrl-aircon", {
-  // props: ['modelValue'],
   data: function () {
     return {
       temperature: 25
@@ -785,10 +918,10 @@ Vue.component("ctrl-aircon", {
         <td>温度設定値</td>
         <td>
           <div class="row">
-            <input id="slider-1" v-model="airconTemperature" type="range" value="20" min="0" max="50" >
+            <input v-model="airconTemperature" type="range" value="20" min="0" max="50" >
             <div class="slider-value" >{{airconTemperature}}℃</div>
             <button type="button" class="btn btn-secondary btn-sm ml-1" title="設定" v-on:click="setTargetTemperature" >設定</button>
-            </div>
+          </div>
         </td>
         <td>
           <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getTargetTemperature">Get value</button>
@@ -802,9 +935,121 @@ Vue.component("ctrl-aircon", {
 
 // Home画面Left window - Property section - 温水器
 Vue.component("ctrl-waterHeater", {
+  data: function () {
+    return {
+      temperature: 25
+    }
+  },
+  computed: {
+    operationStatus: {
+      get() {
+        return vm.waterHeaterOperationStatus;
+      },
+      set() {
+        this.operationStatus = vm.waterHeaterOperationStatus;
+      }
+    },
+    tankOperationMode: {
+      get() {
+        return vm.waterHeaterTankOperationMode;
+      },
+      set() {
+        this.operationMode = vm.waterHeaterTankOperationMode;
+      }
+    },
+    targetWaterHeatingTemperature: {
+      get() {
+        return vm.waterHeaterTargetWaterHeatingTemperature;
+      },
+      set() {
+        this.targetTemperature = vm.waterHeaterTargetWaterHeatingTemperature;
+      }
+    },
+    waterHeaterTemperature: {
+      get() {
+        return this.temperature;
+      },
+      set(value) {
+        // console.log(value);
+        this.temperature = value;
+      }
+    }
+  },
   methods: {
-    sendButtonIsClicked: function () {
-      console.log("SENDボタンがクリックされました。");
+    getOperationStatus: function () {
+      console.log("getOperationStatusがクリックされました。");
+      vm.methodSelected = "GET";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", "");
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + vm.body;
+      }
+    },
+    setOperationStatus: function (arg) {
+      console.log("setOperationStatusがクリックされました。",arg);
+      const body = '{"operationStatus":' + arg + '}';
+      vm.methodSelected = "PUT";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", body);
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + arg;
+      }
+    },
+    getTankOperationMode: function () {
+      console.log("getTankOperationModeがクリックされました。");
+      vm.methodSelected = "GET";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/tankOperationMode", "", "");
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + vm.body;
+      }
+    },
+    setTankOperationMode: function (arg) {
+      console.log("setTankOperationModeがクリックされました。",arg);
+      const body = '{"tankOperationMode":"' + arg + '"}';
+      vm.methodSelected = "PUT";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/tankOperationMode", "", body);
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + arg;
+      }
+    },
+    getTargetWaterHeatingTemperature: function () {
+      console.log("getTargetWaterHeatingTemperatureがクリックされました。");
+      vm.methodSelected = "GET";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/targetWaterHeatingTemperature", "", "");
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + vm.body;
+      }
+    },
+    setTargetWaterHeatingTemperature: function () {
+      console.log("setTargetWaterHeatingTemperatureがクリックされました。", this.waterHeaterTemperature);
+      const body = '{"targetWaterHeatingTemperature":' + this.waterHeaterTemperature + '}';
+      vm.methodSelected = "PUT";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/targetWaterHeatingTemperature", "", body);
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + this.waterHeaterTemperature;
+      }
     }
   },
   template: `
@@ -818,37 +1063,38 @@ Vue.component("ctrl-waterHeater", {
       <tr>
         <td>動作状態</td>
         <td>
-          <button type="button" class="btn btn-secondary btn-sm" title="ON" v-on:click="sendButtonIsClicked" >ON</button>
-          <button type="button" class="btn btn-secondary btn-sm" title="OFF" v-on:click="sendButtonIsClicked" >OFF</button>
+          <button type="button" class="btn btn-secondary btn-sm" title="ON" v-on:click="setOperationStatus('true')" >ON</button>
+          <button type="button" class="btn btn-secondary btn-sm" title="OFF" v-on:click="setOperationStatus('false')" >OFF</button>
         </td>
         <td>
-          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="sendButtonIsClicked">Get value</button>
-          ON
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getOperationStatus">Get value</button>
+          {{operationStatus}}
         </td>
       </tr>
       <tr>
         <td>タンク運転モード</td>
         <td>
-          <button type="button" class="btn btn-secondary btn-sm" title="standard" v-on:click="sendButtonIsClicked" >標準</button>
-          <button type="button" class="btn btn-secondary btn-sm" title="saving" v-on:click="sendButtonIsClicked" >節約</button>
-          <button type="button" class="btn btn-secondary btn-sm" title="extra" v-on:click="sendButtonIsClicked" >多め</button>
+          <button type="button" class="btn btn-secondary btn-sm" title="standard" v-on:click="setTankOperationMode('standard')" >標準</button>
+          <button type="button" class="btn btn-secondary btn-sm" title="saving" v-on:click="setTankOperationMode('saving')" >節約</button>
+          <button type="button" class="btn btn-secondary btn-sm" title="extra" v-on:click="setTankOperationMode('extra')" >多め</button>
         </td>
         <td>
-          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="sendButtonIsClicked">Get value</button>
-          暖房
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getTankOperationMode">Get value</button>
+          {{tankOperationMode}}
         </td>
       </tr>
       <tr>
         <td>沸き上げ湯温設定値</td>
         <td>
           <div class="row">
-            <input id="slider-1" type="range" value="50" min="0" max="100" >
-            <div class="slider-value >24℃</div>
+            <input id="slider-1" v-model="waterHeaterTemperature" type="range" value="40" min="0" max="100" >
+            <div class="slider-value" >{{waterHeaterTemperature}}℃</div>
+            <button type="button" class="btn btn-secondary btn-sm ml-1" title="設定" v-on:click="setTargetWaterHeatingTemperature" >設定</button>
           </div>
         </td>
         <td>
-          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="sendButtonIsClicked">Get value</button>
-          26℃
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getTargetWaterHeatingTemperature">Get value</button>
+          {{targetWaterHeatingTemperature}}
         </td>
       </tr>
     </table>
@@ -1151,9 +1397,31 @@ ws.onmessage = function(event){
       }
       else if (vm.deviceType == "generalLighting"){
         console.log("response is property value for lighting");
+        if (obj.response.operationStatus !== undefined) {
+          vm.lightingOperationStatus = obj.response.operationStatus;
+        }
+        if (obj.response.operationMode !== undefined) {
+          console.log("operationMode is", obj.response.operationMode);
+          vm.lightingOperationMode = obj.response.operationMode;
+        }
+        if (obj.response.brightness !== undefined) {
+          console.log("targetTemperature is", obj.response.brightness);
+          vm.lightingBrightness = obj.response.brightness;
+        }
       }
       else if (vm.deviceType == "electricWaterHeater"){
         console.log("response is property value for waterHeater");
+        if (obj.response.operationStatus !== undefined) {
+          vm.waterHeaterOperationStatus = obj.response.operationStatus;
+        }
+        if (obj.response.tankOperationMode !== undefined) {
+          console.log("tankOperationMode is", obj.response.tankOperationMode);
+          vm.waterHeaterTankOperationMode = obj.response.tankOperationMode;
+        }
+        if (obj.response.targetWaterHeatingTemperature !== undefined) {
+          console.log("targetTemperature is", obj.response.targetWaterHeatingTemperature);
+          vm.waterHeaterTargetWaterHeatingTemperature = obj.response.targetWaterHeatingTemperature;
+        }
       }
   
     }  

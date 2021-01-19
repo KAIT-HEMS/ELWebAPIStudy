@@ -39,7 +39,7 @@
       padding: 0;
     }
     .request-response-wrapper {
-      height: 40em;
+      height: 42em;
       overflow-y: scroll;
     }
     .request-response-list li {
@@ -52,7 +52,7 @@
       padding: 0;
     }
     #deviceDescription-wrapper {
-      height: 12em;
+      height: 10em;
       overflow-y: scroll;
     }
     #deviceDescription-list li {
@@ -177,7 +177,7 @@
 
       <div class="row">
         <!-- Card: Left Window "Operation" -->
-        <div class="card col-6 px-0 mb-3">
+        <div class="card col-7 px-0 mb-3">
           <div class="card-header">
             <div class="row">
               <div class="pl-3 pt-1">
@@ -270,7 +270,7 @@
                   <div class="col-auto pt-1 h5">Device description</div>
                   <div class="col"></div>
                   <!-- Get device description ボタン -->
-                  <div class="col-auto px-0">
+                  <div class="col-auto p-1">
                       <button 
                         type="button" 
                         class="btn btn-secondary btn-sm" 
@@ -309,7 +309,7 @@
                   <div class="col-auto pt-1 h5">Property</div>
                   <div class="col"></div>
                   <!-- Get all property values ボタン -->
-                  <div class="col-auto px-0">
+                  <div class="col-auto p-1">
                     <button 
                       type="button" 
                       class="btn btn-secondary btn-sm" 
@@ -330,7 +330,7 @@
             <!-- Operation guide -->
             <div class="row mx-0">
               <div class="col-auto p mt-1 border">操作ガイド</div>
-              <div class="col p mt-1 border">Operation guide content</div>
+              <div class="col p mt-1 border">{{operationGuide}}</div>
             </div>
 
 
@@ -338,7 +338,7 @@
         </div>
 
         <!-- Card: Right Window -->
-        <div class="card col-6 px-0 mb-3">
+        <div class="card col-5 px-0 mb-3">
           <div class="card-header">
             <div class="row">
               <div class="pl-3 pt-1">
@@ -489,13 +489,16 @@
   <!-- Template for Help page-->
   <script type="text/x-template" id="tmpl-page-help">
     <div>
-      <h4>ECHONET Lite WebAPI Toolについて</h4>
+      <h4>ECHONET Lite WebAPI 学習 Toolについて</h4>
       <p>この Tool は、エコーネットコンソーシアムが策定した
         <a href=https://echonet.jp/web_api/#guideline target="_blank" rel="noreferrer">ECHONET Lite WebAPI</a>
-        の仕様を理解するためのツールです。<br>
+        の仕様を学習するためのツールです。<br>
         エコーネットコンソーシアムが会員向けに運用している実験サーバーへのアクセスを想定しています。<br>
         実験サーバーについては
-        <a href=https://echonet.jp/m_only/web_api_cloud/ target="_blank" rel="noreferrer">こちらの会員限定ページ</a>を参照ください。
+        <a href=https://echonet.jp/m_only/web_api_cloud/ target="_blank" rel="noreferrer">こちらの会員限定ページ</a>を参照ください。<br>
+        このツールは現在、家庭用エアコン（homeAirConditioner）、一般照明（generalLighting）、電気温水器(electricWaterHeater)に対応しています。
+        Get device info ボタンをクリックしたのち、上記の３種類のデバイスのアイコンが表示されない場合は、
+        設定画面から機器を追加してください。
 
       <h4>apiKeyについて</h4>
       <p>このツールを使って実験サーバーにアクセスするには、あらかじめユーザー登録を行い、apiKeyの取得が必要です。<br>
