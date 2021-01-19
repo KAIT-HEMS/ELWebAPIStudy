@@ -37,9 +37,9 @@ let bind_data = {
   waterHeater: {},
   propertyInfoArray: [],  // [{propertyName:string, description:string, writable:boolean}, {}]
 
-  airconOperationStatus: "AOS",
-  airconOperationMode: "AOM",
-  airconTargetTemperature: "ATT",
+  airconOperationStatus: "",
+  airconOperationMode: "",
+  airconTargetTemperature: "",
 
   deviceSelected: "",
   graphicLighting: "off",
@@ -199,6 +199,14 @@ const template_home = {
     },
     getAllPropertyValuesButtonIsClicked: function () {
       console.log("getAllPropertyValues ボタンがクリックされました。");
+      if (this.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(this.scheme, this.elApiServer, this.apiKey, 
+          this.methodSelected, this.prefix, "/devices", "/"+this.device_id, "/properties", "", "", "");
+        // REQUEST表示エリアのデータ設定
+        this.request = "REQ " + message.method + " " + this.scheme + "://" + 
+                      message.hostname + message.path + " " + this.body;  
+      }
     },
     setAirconOperationStatusOnButtonIsClicked: function () {
       console.log("setAirconOperationStatusOn ボタンがクリックされました。");
@@ -633,6 +641,22 @@ Vue.component("ctrl-aircon", {
         this.operationStatus = vm.airconOperationStatus;
       }
     },
+    operationMode: {
+      get() {
+        return vm.airconOperationMode;
+      },
+      set() {
+        this.operationMode = vm.airconOperationMode;
+      }
+    },
+    targetTemperature: {
+      get() {
+        return vm.airconTargetTemperature;
+      },
+      set() {
+        this.targetTemperature = vm.airconTargetTemperature;
+      }
+    },
     airconTemperature: {
       get() {
         return this.temperature;
@@ -671,15 +695,53 @@ Vue.component("ctrl-aircon", {
     },
     getOperationMode: function () {
       console.log("getOperationModeがクリックされました。");
+      vm.methodSelected = "GET";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationMode", "", "");
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + vm.body;
+      }
     },
     setOperationMode: function (arg) {
       console.log("setOperationModeがクリックされました。",arg);
+      const body = '{"operationMode":"' + arg + '"}';
+      vm.methodSelected = "PUT";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationMode", "", body);
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + arg;
+      }
     },
     getTargetTemperature: function () {
       console.log("getTargetTemperatureがクリックされました。");
+      vm.methodSelected = "GET";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/targetTemperature", "", "");
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + vm.body;
+      }
     },
     setTargetTemperature: function () {
       console.log("setTargetTemperatureがクリックされました。", this.airconTemperature);
+      const body = '{"targetTemperature":' + this.airconTemperature + '}';
+      vm.methodSelected = "PUT";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
+          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/targetTemperature", "", body);
+        // REQUEST表示エリアのデータ設定
+        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+                      message.hostname + message.path + " " + this.airconTemperature;
+      }
     }
   },
   template: `
@@ -710,19 +772,21 @@ Vue.component("ctrl-aircon", {
         </td>
         <td>
           <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getOperationMode">Get value</button>
+          {{operationMode}}
         </td>
       </tr>
       <tr>
         <td>温度設定値</td>
         <td>
           <div class="row">
-            <input id="slider-1" v-model="airconTemperature" type="range" value="50" min="0" max="100" >
+            <input id="slider-1" v-model="airconTemperature" type="range" value="20" min="0" max="50" >
             <div class="slider-value" >{{airconTemperature}}℃</div>
             <button type="button" class="btn btn-secondary btn-sm ml-1" title="設定" v-on:click="setTargetTemperature" >設定</button>
             </div>
         </td>
         <td>
           <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getTargetTemperature">Get value</button>
+          {{targetTemperature}}
         </td>
       </tr>
     </table>
@@ -1060,18 +1124,30 @@ ws.onmessage = function(event){
   // GET /elapi/v1/devices, groups, bulks, histories/<id>/properties/<property>
   service = "";
   regex = /\/properties\/([0-9]|[a-z]|[A-Z])+$/; // 正規表現'/properties/'の後、行末まで英数字
-  if (regex.test(obj.path)) {
-    console.log("response is /properties/<property>", vm.deviceType);
-    if (vm.deviceType == "homeAirConditioner"){
-      console.log("response is property value for aircon");
-    }
-    else if (vm.deviceType == "generalLighting"){
-      console.log("response is property value for lighting");
-    }
-    else if (vm.deviceType == "electricWaterHeater"){
-      console.log("response is property value for waterHeater");
-    }
-
+  if (obj.method == 'GET') {
+    if (regex.test(obj.path)) {
+      console.log("response is /properties/<property>", vm.deviceType);
+      console.log("response:", obj.response);
+      if (vm.deviceType == "homeAirConditioner"){
+        console.log("response is property value for aircon");
+        if (obj.response.operationStatus !== undefined) {
+          vm.airconOperationStatus = obj.response.operationStatus;
+        } else if (obj.response.operationMode !== undefined) {
+          console.log("operationMode is", obj.response.operationMode);
+          vm.airconOperationMode = obj.response.operationMode;
+        } else if (obj.response.targetTemperature !== undefined) {
+          console.log("targetTemperature is", obj.response.targetTemperature);
+          vm.airconTargetTemperature = obj.response.targetTemperature;
+        }
+      }
+      else if (vm.deviceType == "generalLighting"){
+        console.log("response is property value for lighting");
+      }
+      else if (vm.deviceType == "electricWaterHeater"){
+        console.log("response is property value for waterHeater");
+      }
+  
+    }  
   }
   
   g_flagSendButtonIsClicked = false;
