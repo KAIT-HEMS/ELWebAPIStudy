@@ -125,7 +125,10 @@ const template_home = {
   data:() => {return (bind_data);},
   computed: {
     selectedDeviceComponent: function() {
-      return "ctrl-" + this.deviceSelected;
+      // Device Description が取得済みの場合のみ Property Sectionを表示する
+      if (this.propertyInfoArray) {
+        return "ctrl-" + this.deviceSelected;
+      }
     }
   },
   methods: {
@@ -138,8 +141,8 @@ const template_home = {
       this.request = "REQ " + message.method + " " + this.scheme + "://" + 
                     message.hostname + message.path + " " + this.body;
     },
-    clearDeviceInfoButtonIsClicked: function () {
-      console.log("clearDeviceInfo ボタンがクリックされました。");
+    clearOperationButtonIsClicked: function () {
+      console.log("clearOperation ボタンがクリックされました。");
       this.deviceSelected = "";
       this.graphicLighting = "off";
       this.graphicAircon = "off";
@@ -149,6 +152,9 @@ const template_home = {
       this.device_version = "";
       this.device_manufacturer = "";
       this.propertyInfoArray = [];
+      this.airconOperationStatus = "";
+      this.airconOperationMode = "";
+      this.airconTargetTemperature = "";
     },
     lightingIsClicked: function () {
       console.log("照明が選択されました。");
@@ -1123,7 +1129,8 @@ ws.onmessage = function(event){
 
   // GET /elapi/v1/devices, groups, bulks, histories/<id>/properties/<property>
   service = "";
-  regex = /\/properties\/([0-9]|[a-z]|[A-Z])+$/; // 正規表現'/properties/'の後、行末まで英数字
+  // regex = /\/properties\/([0-9]|[a-z]|[A-Z])+$/; // 正規表現'/properties/'の後、行末まで英数字
+  regex = /\/properties/; // 正規表現：'/properties'
   if (obj.method == 'GET') {
     if (regex.test(obj.path)) {
       console.log("response is /properties/<property>", vm.deviceType);
@@ -1132,10 +1139,12 @@ ws.onmessage = function(event){
         console.log("response is property value for aircon");
         if (obj.response.operationStatus !== undefined) {
           vm.airconOperationStatus = obj.response.operationStatus;
-        } else if (obj.response.operationMode !== undefined) {
+        }
+        if (obj.response.operationMode !== undefined) {
           console.log("operationMode is", obj.response.operationMode);
           vm.airconOperationMode = obj.response.operationMode;
-        } else if (obj.response.targetTemperature !== undefined) {
+        }
+        if (obj.response.targetTemperature !== undefined) {
           console.log("targetTemperature is", obj.response.targetTemperature);
           vm.airconTargetTemperature = obj.response.targetTemperature;
         }
