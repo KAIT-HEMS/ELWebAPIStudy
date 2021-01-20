@@ -1,6 +1,6 @@
 // elwebapistudy.js for elwebapistudy(client side)
-// 2021.01.12
-// Copyright (c) 2020 Kanagawa Institute of Technology, ECHONET Consortium
+// 2021.01.19
+// Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium
 // Released under the MIT License.
 // 
 // elwebapistudy.jsは、ELWebApiStudyのクライアント側JavaScript codeである。

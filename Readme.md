@@ -1,17 +1,20 @@
 # ELWebAPIStudy
 
-2021.01.06
+2021.01.20
 
 ## Abstract
-ELWebAPIStudyは、ECHONET Lite WebAPIの学習ツールである。
-エコーネットコンソーシアムが運営している実験サーバーへのアクセスを想定している。
-このツールを利用して実験サーバーへアクセスするには、実験サーバーのアカウントを作成し、
-APIkeyを取得する必要がある。
+
+ECHONET Lite WebAPI 学習 Toolは、エコーネットコンソーシアムが策定した ECHONET Lite WebAPI の仕様を学習するためのツールです。
+エコーネットコンソーシアムが会員向けに運用している実験サーバーへのアクセスを想定しています。
+実験サーバーについてはエコーネットコンソーシアムの会員限定ページを参照ください。
+このツールは現在、家庭用エアコン（homeAirConditioner）、一般照明（generalLighting）、電気温水器(electricWaterHeater)に対応しています。
 
 ## Requirements
+
 Node.jsがインストールされたWindows PC, Macまたは Linux  
 
 ## Installation
+
 1. zip fileを解凍する
 2. 解凍したフォルダーに移動し、ターミナルで expressとwsをnpmでインストールする
 
@@ -21,22 +24,28 @@ Node.jsがインストールされたWindows PC, Macまたは Linux
 ```
 
 ## Launch
+
 1. 解凍したフォルダーに移動し、ターミナルで以下のコマンドを実行する   
 
-    ```
-      node index.js
-    ```
+  ```
+    node index.js
+  ```
 
 2. Web Browserを起動し、localhost:3020 をアクセスする  
+
 3. 設定画面でapiKeyを入力する
 
+## 設定
+
+エコーネットコンソーシアムの会員限定ページから実験サーバーのユーザー登録を行ってapiKeyを取得し、
+このツールの設定画面でapiKeyを入力してください。
+
 ## 使い方
-まずは、ホーム画面の右上のSENDボタンを４回クリックすると、順次ECHONET Lite WebAPIのリクエストが発行され、Request & Response Windowにデータが表示される。
 
-その後、各項目（Method, Service, Id, Resource Type, Resource Name）を選択してSENDボタンをクリックすることで、さまざまな API を試すことができる。各項目の値を消去するには、プルダウンメニューの最上位のブランクを選択する。
+画面左下の「操作ガイド」にしたがって操作してください。
 
-## 機器エミュレーション
-実験サーバーでは、サーバー上でECHONET Lite機器をエミュレーションする。このツールの設定画面で、エミュレーションしている機器の表示や、エミュレーションする機器の追加・削除を行うことができる。
+Get device info ボタンをクリックしたのち、家庭用エアコン（homeAirConditioner）、一般照明（generalLighting）、電気温水器(electricWaterHeater)の３種類のデバイスのアイコンが表示されない場合は、 設定画面から機器を追加してください。
 
 ## Note
-- 設定画面でhttpを選択することができるが、実装はしていない
+
+- 設定画面でhttpを選択することができるが、実装はしていない。
