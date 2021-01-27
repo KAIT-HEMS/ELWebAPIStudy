@@ -47,6 +47,9 @@
       font-size: 90%;
       padding: 0.2em 1em;
     }
+    #card-property-body {
+      height: 10em;
+    }
     #message-monitor-body {
       margin: 0;
       padding: 0;
@@ -321,7 +324,7 @@
                 </div>
               </div>
 
-              <div class="card-body py-0">
+              <div class="card-body py-0" id="card-property-body">
                 <component v-bind:is="selectedDeviceComponent"></component>
               </div>
 
@@ -358,6 +361,7 @@
             <div class="request-response-wrapper">
               <ul class="list-group request-response-list">
                 <li class="list-group-item" >{{request}}</li>
+                <li class="list-group-item" >{{requestBody}}</li>
                 <li class="list-group-item" >{{statusCode}}</li>
                 <li class="list-group-item" ><pre>{{response}}</pre></li>
               </ul>

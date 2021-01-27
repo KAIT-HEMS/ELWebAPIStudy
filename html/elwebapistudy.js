@@ -1,5 +1,5 @@
 // elwebapistudy.js for elwebapistudy(client side)
-// 2021.01.19
+// 2021.01.27
 // Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium
 // Released under the MIT License.
 // 
@@ -10,7 +10,7 @@
 'use strict';
 
 const g_serverURL = "/elwebapistudy/";　// SPAのweb serverのURL
-let g_dataLogArray = []; // logを格納するarray
+// let g_dataLogArray = []; // logを格納するarray
 let g_thingInfo = {}; 
 // thing id(device id, group id, bulk id, history id)をkeyとして、以下の項目を保持
 // serviceがdevice以外の場合は、"deviceType":""
@@ -22,7 +22,7 @@ let g_thingInfo = {};
   //     "actionList":[<resourceName>]
 　// 　}
 　// }
-let g_flagSendButtonIsClicked = false; // Request & ResponseとLOGに不要なデータを表示しないためのflag
+let g_flagSendButtonIsClicked = false; // Request & Responseに不要なデータを表示しないためのflag
 
 let bind_data = {
   // data in config.json
@@ -57,27 +57,28 @@ let bind_data = {
   device_version: "",
   device_manufacturer: "",
 
-  methodList: ["GET", "PUT", "POST", "DELETE"],
-  methodSelected: "GET",
+  // methodList: ["GET", "PUT", "POST", "DELETE"],
+  // requestMethod: "GET",
   serviceList: [""], // [/devices, /groups]
-  serviceSelected: "",
+  // serviceSelected: "",
   idInfoList: [], // [{deviceType:"/aircon", id:"0123", version:"Rel.M", manufacturer:"神奈川工科大学"},... ] 
                   // GET /devices, groups, bulk, histories のレスポンスを利用
   idSelected: "",
   idToolTip: "XXX",
   deviceType: "",
   resourceTypeList: [], // [/properties, /actons]
-  resourceTypeSelected: "",
+  // resourceTypeSelected: "",
   resourceNameList: [], // [/airFlowLevel, /roomTemperature,...]
-  resourceNameSelected:"",
+  // resourceNameSelected:"",
   query: "",
   body: "",
 
   // Home page, Request & Response, LOG
   request: "request:",
+  requestBody: "request body:",
   statusCode: "response: status code",
   response: "response: data",
-  rbOrder: "normalOrder", // "normalOrder" or "reverseOrder"
+  // rbOrder: "normalOrder", // "normalOrder" or "reverseOrder"
   message_list: [],
 
   // Setting page
@@ -155,11 +156,14 @@ const template_home = {
     getDeviceInfoButtonIsClicked: function () {
       console.log("getDeviceInfo ボタンがクリックされました。");
       g_flagSendButtonIsClicked = true;
+      const requestMethod = "GET";
       const message = accessElServer(this.scheme, this.elApiServer, this.apiKey, 
-        this.methodSelected, this.prefix, "/devices", "", "", "", "", "");
+        requestMethod, this.prefix, "/devices", "", "", "", "", "");
       // REQUEST表示エリアのデータ設定
-      this.request = "REQ " + message.method + " " + this.scheme + "://" + 
-                    message.hostname + message.path + " " + this.body;
+      this.request = makeRequest(message.method, this.scheme, message.hostname, message.path);
+      this.requestBody = "";
+      // this.request = "REQ " + message.method + " " + this.scheme + "://" + 
+      //               message.hostname + message.path + " " + this.body;
     },
     clearOperationButtonIsClicked: function () {
       console.log("clearOperation ボタンがクリックされました。");
@@ -217,22 +221,28 @@ const template_home = {
       console.log("getDeviceDescription ボタンがクリックされました。");
       if (this.device_id !== "") {
         g_flagSendButtonIsClicked = true;
+        const requestMethod = "GET";
         const message = accessElServer(this.scheme, this.elApiServer, this.apiKey, 
-          this.methodSelected, this.prefix, "/devices", "/"+this.device_id, "", "", "", "");
+          requestMethod, this.prefix, "/devices", "/"+this.device_id, "", "", "", "");
         // REQUEST表示エリアのデータ設定
-        this.request = "REQ " + message.method + " " + this.scheme + "://" + 
-                      message.hostname + message.path + " " + this.body;  
+        this.request = makeRequest(message.method, this.scheme, message.hostname, message.path);
+        this.requestBody = "";
+          // this.request = "REQ " + message.method + " " + this.scheme + "://" + 
+          //             message.hostname + message.path + " " + this.body;  
       }
     },
     getAllPropertyValuesButtonIsClicked: function () {
       console.log("getAllPropertyValues ボタンがクリックされました。");
       if (this.device_id !== "") {
         g_flagSendButtonIsClicked = true;
+        const requestMethod = "GET";
         const message = accessElServer(this.scheme, this.elApiServer, this.apiKey, 
-          this.methodSelected, this.prefix, "/devices", "/"+this.device_id, "/properties", "", "", "");
+          requestMethod, this.prefix, "/devices", "/"+this.device_id, "/properties", "", "", "");
         // REQUEST表示エリアのデータ設定
-        this.request = "REQ " + message.method + " " + this.scheme + "://" + 
-                      message.hostname + message.path + " " + this.body;  
+        this.request = makeRequest(message.method, this.scheme, message.hostname, message.path);
+        this.requestBody = "";
+          // this.request = "REQ " + message.method + " " + this.scheme + "://" + 
+          //             message.hostname + message.path + " " + this.body;  
       }
     },
     setAirconOperationStatusOnButtonIsClicked: function () {
@@ -247,6 +257,7 @@ const template_home = {
     clearReqAndResButtonIsClicked: function () {
       console.log("clearReqAndRes ボタンがクリックされました。");
       this.request = "request:";
+      this.requestBody = "request body";
       this.statusCode = "response: status code";
       this.response = "response: data";
     },
@@ -254,142 +265,143 @@ const template_home = {
     
 
     // SENDボタンがクリックされたときの処理
-    sendButtonIsClicked: function () {
-      console.log("SENDボタンがクリックされました。");
-      g_flagSendButtonIsClicked = true;
-      // ECHONET Lite WebApi serverにアクセスする
-      const message = accessElServer(this.scheme, this.elApiServer, this.apiKey, 
-        this.methodSelected, this.prefix, this.serviceSelected, this.idSelected, 
-        this.resourceTypeSelected, this.resourceNameSelected, this.query, this.body);
+    // sendButtonIsClicked: function () {
+    //   console.log("SENDボタンがクリックされました。");
+    //   g_flagSendButtonIsClicked = true;
+    //   // ECHONET Lite WebApi serverにアクセスする
+    //   const message = accessElServer(this.scheme, this.elApiServer, this.apiKey, 
+    //     this.requestMethod, this.prefix, this.serviceSelected, this.idSelected, 
+    //     this.resourceTypeSelected, this.resourceNameSelected, this.query, this.body);
 
-      // REQUEST表示エリアのデータ設定
-      this.request = "REQ " + message.method + " " + this.scheme + "://" +message.hostname + message.path + " " + this.body;
+    //   // REQUEST表示エリアのデータ設定
+    //   this.request = "REQ " + message.method + " " + this.scheme + "://" +
+    //                  message.hostname + message.path + " " + this.body;
     
-      // REQUESTをLOGに追加
-      g_dataLogArray.push({
-        timeStamp:timeStamp(),
-        direction:"REQ",
-        data:message
-      });
+    //   // REQUESTをLOGに追加
+    //   // g_dataLogArray.push({
+    //   //   timeStamp:timeStamp(),
+    //   //   direction:"REQ",
+    //   //   data:message
+    //   // });
 
-      // ログを表示
-      displayLog();
-    },
+    //   // ログを表示
+    //   // displayLog();
+    // },
 
     // Copy from responseボタンがクリックされたときの処理
-    copyFromResponseButtonIsClicked: function () {
-      this.body = JSON.stringify(vm.response);
-    },
+    // copyFromResponseButtonIsClicked: function () {
+    //   this.body = JSON.stringify(vm.response);
+    // },
 
     // 入力フィールド Method の値が変更された場合の処理
     // resourceTypeListとresourceNameListをupdate
-    methodIsUpdated: function () {
-      // serviceとdevice idがblankでなく、device descriptionが存在する場合
-      if ((this.serviceSelected !== "") && (this.idSelected !== "")) {
-        console.log("methodIsUpdated:idSelected", this.idSelected);
-        const thingId = this.idSelected.slice(1); // remove "/" from idSelected
-        let resourceNameList = [""];
-        if (g_thingInfo[thingId] !== undefined) {
-          switch (this.methodSelected) {
-            case "GET":
-              vm.body = "";
-              resourceNameList = g_thingInfo[thingId].propertyList;
-              vm.resourceTypeSelected = "/properties";
-              break;
-            case "PUT":
-              resourceNameList = g_thingInfo[thingId].propertyListWritable;
-              vm.resourceTypeSelected = "/properties";
-              break;
-            case "POST":
-              resourceNameList = g_thingInfo[thingId].actionList;
-              vm.resourceTypeSelected = "/actions";
-              break;
-            case "DELETE":
-              break;
-          }
-          if (vm.resourceTypeSelected !== ""){
-            vm.resourceNameList = resourceNameList;
-          }
-        }
-      }
-    },
+    // methodIsUpdated: function () {
+    //   // serviceとdevice idがblankでなく、device descriptionが存在する場合
+    //   if ((this.serviceSelected !== "") && (this.idSelected !== "")) {
+    //     console.log("methodIsUpdated:idSelected", this.idSelected);
+    //     const thingId = this.idSelected.slice(1); // remove "/" from idSelected
+    //     let resourceNameList = [""];
+    //     if (g_thingInfo[thingId] !== undefined) {
+    //       switch (this.requestMethod) {
+    //         case "GET":
+    //           vm.body = "";
+    //           resourceNameList = g_thingInfo[thingId].propertyList;
+    //           vm.resourceTypeSelected = "/properties";
+    //           break;
+    //         case "PUT":
+    //           resourceNameList = g_thingInfo[thingId].propertyListWritable;
+    //           vm.resourceTypeSelected = "/properties";
+    //           break;
+    //         case "POST":
+    //           resourceNameList = g_thingInfo[thingId].actionList;
+    //           vm.resourceTypeSelected = "/actions";
+    //           break;
+    //         case "DELETE":
+    //           break;
+    //       }
+    //       if (vm.resourceTypeSelected !== ""){
+    //         vm.resourceNameList = resourceNameList;
+    //       }
+    //     }
+    //   }
+    // },
 
     // 入力フィールド service の値が変更された場合の処理
-    serviceIsUpdated: function () {
-      vm.idInfoList =[{}]
-      vm.resourceTypeList = [""];
-      vm.resourceNameList = [""];
-      vm.idSelected = "";
-      vm.resourceTypeSelected = "";
-      vm.resourceNameSelected = "";
-      vm.deviceType = "";
-      vm.body = "";
-    },
+    // serviceIsUpdated: function () {
+    //   vm.idInfoList =[{}]
+    //   vm.resourceTypeList = [""];
+    //   vm.resourceNameList = [""];
+    //   vm.idSelected = "";
+    //   vm.resourceTypeSelected = "";
+    //   vm.resourceNameSelected = "";
+    //   vm.deviceType = "";
+    //   vm.body = "";
+    // },
 
     // 入力フィールド id の値が変更された場合の処理
     // vm.deviceTypeをvm.idInfoListを利用してupdateする
     // 選択されたidのdevice descriptionが存在する場合は、resourceTypeとresourceNameを更新する
-    idIsUpdated: function () {
-      console.log("idIsUpdated");
-      const thingId = this.idSelected.slice(1); // remove "/"
-      vm.resourceTypeList = [""];
-      vm.resourceNameList = [""];
-      vm.deviceType ="";
-      vm.resourceTypeSelected = "";
-      vm.resourceNameSelected = "";
+    // idIsUpdated: function () {
+    //   console.log("idIsUpdated");
+    //   const thingId = this.idSelected.slice(1); // remove "/"
+    //   vm.resourceTypeList = [""];
+    //   vm.resourceNameList = [""];
+    //   vm.deviceType ="";
+    //   vm.resourceTypeSelected = "";
+    //   vm.resourceNameSelected = "";
 
-      updateDeviceType(thingId);
-      const deviceInfo = g_thingInfo[thingId];
-      if (deviceInfo !== undefined){
-        let resourceTypeList = [""];
-        if (deviceInfo.propertyList !== undefined) {
-          resourceTypeList.push("/properties");
-        }
-        if (deviceInfo.actionList !== undefined) {
-          resourceTypeList.push("/actions");
-        }
-        vm.resourceTypeList = resourceTypeList;
-        vm.resourceTypeSelected = (resourceTypeList[1]) ? resourceTypeList[1] : "";
-        updateResourceName(vm.methodSelected, thingId, vm.resourceTypeSelected);
-        vm.resourceNameSelected = (vm.resourceNameList[1]) ? vm.resourceNameList[1] : "";
-      } 
-    },
+    //   updateDeviceType(thingId);
+    //   const deviceInfo = g_thingInfo[thingId];
+    //   if (deviceInfo !== undefined){
+    //     let resourceTypeList = [""];
+    //     if (deviceInfo.propertyList !== undefined) {
+    //       resourceTypeList.push("/properties");
+    //     }
+    //     if (deviceInfo.actionList !== undefined) {
+    //       resourceTypeList.push("/actions");
+    //     }
+    //     vm.resourceTypeList = resourceTypeList;
+    //     vm.resourceTypeSelected = (resourceTypeList[1]) ? resourceTypeList[1] : "";
+    //     updateResourceName(vm.requestMethod, thingId, vm.resourceTypeSelected);
+    //     vm.resourceNameSelected = (vm.resourceNameList[1]) ? vm.resourceNameList[1] : "";
+    //   } 
+    // },
 
     // 入力フィールド resourceType の値が変更された場合の処理
     //  resourceNameListをupdateする
-    resourceTypeIsUpdated: function () {
-      updateResourceName(this.methodSelected, this.idSelected.slice(1), this.resourceTypeSelected);
-    },
+    // resourceTypeIsUpdated: function () {
+    //   updateResourceName(this.requestMethod, this.idSelected.slice(1), this.resourceTypeSelected);
+    // },
 
     // 入力フィールド resourceName の値が変更された場合の処理
-    resourceNameIsUpdated: function () {
-      const resourceNameSelected=this.resourceNameSelected;
-    },
+    // resourceNameIsUpdated: function () {
+    //   const resourceNameSelected=this.resourceNameSelected;
+    // },
 
     // ログのorderのラジオボタンが選択された時の処理
-    rbOrderIsChanged: function () {
-      displayLog();
-    },
+    // rbOrderIsChanged: function () {
+    //   displayLog();
+    // },
 
     // CLEARボタンがクリックされたときの処理（ログ画面のクリア）
-    clearButtonisClicked: function () {
-      clearLog();
-    },
+    // clearButtonisClicked: function () {
+    //   clearLog();
+    // },
 
     // SAVEボタンがクリックされたときの処理（ログの保存）
-    saveButtonisClicked: function () {
-      saveLog();
-    }
+    // saveButtonisClicked: function () {
+    //   saveLog();
+    // }
   }
 };
 
-function updateDeviceType(deviceId) {
-  for (const idInfo of vm.idInfoList) {
-    if (idInfo.id == ("/" + deviceId)) {
-      vm.deviceType = idInfo.deviceType;
-    }
-  }
-}
+// function updateDeviceType(deviceId) {
+//   for (const idInfo of vm.idInfoList) {
+//     if (idInfo.id == ("/" + deviceId)) {
+//       vm.deviceType = idInfo.deviceType;
+//     }
+//   }
+// }
 
 // component:template_settingの定義
 const template_setting = {
@@ -416,8 +428,9 @@ const template_setting = {
     // UPDATEボタンがクリックされたときの処理
     updateButtonIsClicked: function () {
       console.log("updateButtonIsClicked is clicked");
+      const requestMethod = "GET";
       accessElServer(this.scheme, this.elApiServer, this.apiKey, 
-        this.methodSelected, this.prefix, "/devices", "", "", "", "", "");
+        requestMethod, this.prefix, "/devices", "", "", "", "", "");
       }
   },
   // Setting pageを表示する時に呼ばれるfunction
@@ -445,8 +458,13 @@ const router = new VueRouter({
 	]
 });
 
+// 
+function makeRequest(method, scheme, hostname, path) {
+  return "REQ " + method + " " + scheme + "://" + hostname + path;
+}
+
 // ECHONET Lite WebApi serverにアクセスする
-function accessElServer(scheme, elApiServer, apiKey, methodSelected, prefix, serviceSelected, idSelected, resourceTypeSelected, resourceNameSelected, query, body) {
+function accessElServer(scheme, elApiServer, apiKey, requestMethod, prefix, serviceSelected, idSelected, resourceTypeSelected, resourceNameSelected, query, body) {
   console.log("access ECHONET Lite WebApi server")
   console.log("serviceSelected:",serviceSelected)
   // pathの作成
@@ -468,10 +486,10 @@ function accessElServer(scheme, elApiServer, apiKey, methodSelected, prefix, ser
   }
   console.log(" path:",path);
 
-  const bodyData = (methodSelected == "GET") ? "" : body;
+  const bodyData = (requestMethod == "GET") ? "" : body;
   let message = {
     hostname: elApiServer,
-    method:   methodSelected, 
+    method:   requestMethod, 
     path:     path,
     headers:  {
       "X-Elapi-key":    apiKey,
@@ -536,33 +554,33 @@ function accessElServerAddDevice(scheme, elApiServer, apiKey, prefix, deviceType
   request.send(JSON.stringify(message));
 }
 
-function clearLog() {
-  g_dataLogArray.length = 0;
-  vm.message_list = [];
-}
+// function clearLog() {
+//   g_dataLogArray.length = 0;
+//   vm.message_list = [];
+// }
 
-function saveLog() {
-  // g_dataLogArrayから保存用のstringの作成
-  let log = "";
-  for (let dataLog of g_dataLogArray) {
-    if (dataLog.direction == "REQ") { // REQUESTの場合
-      log += dataLog.timeStamp + ",REQ," + dataLog.data.method + "," + vm.scheme + "://" + dataLog.data.hostname + dataLog.data.path;
-      if (dataLog.data.body == ""){
-        log +=  "\n";
-      } else {
-        log +=  ",body:" + dataLog.data.body + "\n";
-      }
-    } else {　// RESPONSEの場合
-      log = log + dataLog.timeStamp + ",RES," + dataLog.data.statusCode + "," + JSON.stringify(dataLog.data.response) + "\n";
-    }
-  }
-  // ログ保存をサーバーに依頼
-  const message = {log:log};
-  const request = new XMLHttpRequest();
-  request.open('POST', g_serverURL + 'saveLog');
-  request.setRequestHeader("Content-type", "application/json");
-  request.send(JSON.stringify(message));
-}
+// function saveLog() {
+//   // g_dataLogArrayから保存用のstringの作成
+//   let log = "";
+//   for (let dataLog of g_dataLogArray) {
+//     if (dataLog.direction == "REQ") { // REQUESTの場合
+//       log += dataLog.timeStamp + ",REQ," + dataLog.data.method + "," + vm.scheme + "://" + dataLog.data.hostname + dataLog.data.path;
+//       if (dataLog.data.body == ""){
+//         log +=  "\n";
+//       } else {
+//         log +=  ",body:" + dataLog.data.body + "\n";
+//       }
+//     } else {　// RESPONSEの場合
+//       log = log + dataLog.timeStamp + ",RES," + dataLog.data.statusCode + "," + JSON.stringify(dataLog.data.response) + "\n";
+//     }
+//   }
+//   // ログ保存をサーバーに依頼
+//   const message = {log:log};
+//   const request = new XMLHttpRequest();
+//   request.open('POST', g_serverURL + 'saveLog');
+//   request.setRequestHeader("Content-type", "application/json");
+//   request.send(JSON.stringify(message));
+// }
 
 // config保存をサーバーに依頼
 function saveConfig(configData) {
@@ -574,23 +592,23 @@ function saveConfig(configData) {
   request.send(JSON.stringify(message));
 }
 
-function updateResourceName(methodSelected, idSelected, resourceTypeSelected) {
-  console.log("updateResourceName ", methodSelected, idSelected, resourceTypeSelected)
+function updateResourceName(requestMethod, idSelected, resourceTypeSelected) {
+  console.log("updateResourceName ", requestMethod, idSelected, resourceTypeSelected)
   let resourceNameList = [];
   if (resourceTypeSelected !== "") {
     const thingInfo = g_thingInfo[idSelected];
     if (thingInfo !== undefined) {
-      if ((resourceTypeSelected == "/properties") && (methodSelected == "GET")) {
+      if ((resourceTypeSelected == "/properties") && (requestMethod == "GET")) {
         resourceNameList = thingInfo.propertyList;
       }  
-      if ((resourceTypeSelected == "/properties") && (methodSelected == "PUT")) {
+      if ((resourceTypeSelected == "/properties") && (requestMethod == "PUT")) {
         resourceNameList = thingInfo.propertyListWritable;
       }
-      if ((resourceTypeSelected == "/actions") && (methodSelected == "POST")) {
+      if ((resourceTypeSelected == "/actions") && (requestMethod == "POST")) {
         resourceNameList = thingInfo.actionList;
       }
       vm.resourceNameList = resourceNameList;
-      vm.resourceNameSelected = (resourceNameList[1]) ? resourceNameList[1] : "";   
+      // vm.resourceNameSelected = (resourceNameList[1]) ? resourceNameList[1] : "";   
     }
   }
 }
@@ -640,77 +658,90 @@ Vue.component("ctrl-lighting", {
   methods: {
     getOperationStatus: function () {
       console.log("getOperationStatusがクリックされました。");
-      vm.methodSelected = "GET";
+      const requestMethod = "GET";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", "");
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", "");
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + vm.body;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = "";
+
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setOperationStatus: function (arg) {
       console.log("setOperationStatusがクリックされました。",arg);
-      const body = '{"operationStatus":' + arg + '}';
-      vm.methodSelected = "PUT";
+      const body = '{"operationStatus": ' + arg + '}';
+      const requestMethod = "PUT";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", body);
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", body);
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + arg;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = body;
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + arg;
       }
     },
     getOperationMode: function () {
       console.log("getOperationModeがクリックされました。");
-      vm.methodSelected = "GET";
+      const requestMethod = "GET";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationMode", "", "");
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationMode", "", "");
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + vm.body;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = "";
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setOperationMode: function (arg) {
       console.log("setOperationModeがクリックされました。",arg);
       const body = '{"operationMode":"' + arg + '"}';
-      vm.methodSelected = "PUT";
+      const requestMethod = "PUT";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationMode", "", body);
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationMode", "", body);
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + arg;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = body;
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + arg;
       }
     },
     getBrightness: function () {
       console.log("getBrightnessがクリックされました。");
-      vm.methodSelected = "GET";
+      const requestMethod = "GET";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/brightness", "", "");
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/brightness", "", "");
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + vm.body;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = "";
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setBrightness: function () {
       console.log("setBrightnessがクリックされました。", this.lightingBrightness);
       const body = '{"brightness":' + this.lightingBrightness + '}';
-      vm.methodSelected = "PUT";
+      const requestMethod = "PUT";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/brightness", "", body);
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/brightness", "", body);
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + this.lightingBrightness;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = body;
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + this.lightingBrightness;
       }
     }
   },
@@ -809,77 +840,89 @@ Vue.component("ctrl-aircon", {
   methods: {
     getOperationStatus: function () {
       console.log("getOperationStatusがクリックされました。");
-      vm.methodSelected = "GET";
+      const requestMethod = "GET";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", "");
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", "");
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + vm.body;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = "";
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setOperationStatus: function (arg) {
       console.log("setOperationStatusがクリックされました。",arg);
       const body = '{"operationStatus":' + arg + '}';
-      vm.methodSelected = "PUT";
+      const requestMethod = "PUT";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", body);
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", body);
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + arg;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = body;
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + arg;
       }
     },
     getOperationMode: function () {
       console.log("getOperationModeがクリックされました。");
-      vm.methodSelected = "GET";
+      const requestMethod = "GET";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationMode", "", "");
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationMode", "", "");
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + vm.body;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = "";
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setOperationMode: function (arg) {
       console.log("setOperationModeがクリックされました。",arg);
       const body = '{"operationMode":"' + arg + '"}';
-      vm.methodSelected = "PUT";
+      const requestMethod = "PUT";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationMode", "", body);
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationMode", "", body);
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + arg;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = body;
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + arg;
       }
     },
     getTargetTemperature: function () {
       console.log("getTargetTemperatureがクリックされました。");
-      vm.methodSelected = "GET";
+      const requestMethod = "GET";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/targetTemperature", "", "");
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/targetTemperature", "", "");
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + vm.body;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = "";
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setTargetTemperature: function () {
       console.log("setTargetTemperatureがクリックされました。", this.airconTemperature);
       const body = '{"targetTemperature":' + this.airconTemperature + '}';
-      vm.methodSelected = "PUT";
+      const requestMethod = "PUT";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/targetTemperature", "", body);
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/targetTemperature", "", body);
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + this.airconTemperature;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = body;
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + this.airconTemperature;
       }
     }
   },
@@ -978,77 +1021,89 @@ Vue.component("ctrl-waterHeater", {
   methods: {
     getOperationStatus: function () {
       console.log("getOperationStatusがクリックされました。");
-      vm.methodSelected = "GET";
+      const requestMethod = "GET";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", "");
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", "");
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + vm.body;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = "";
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setOperationStatus: function (arg) {
       console.log("setOperationStatusがクリックされました。",arg);
       const body = '{"operationStatus":' + arg + '}';
-      vm.methodSelected = "PUT";
+      const requestMethod = "PUT";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", body);
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/operationStatus", "", body);
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + arg;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = body;
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + arg;
       }
     },
     getTankOperationMode: function () {
       console.log("getTankOperationModeがクリックされました。");
-      vm.methodSelected = "GET";
+      const requestMethod = "GET";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/tankOperationMode", "", "");
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/tankOperationMode", "", "");
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + vm.body;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = "";
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setTankOperationMode: function (arg) {
       console.log("setTankOperationModeがクリックされました。",arg);
       const body = '{"tankOperationMode":"' + arg + '"}';
-      vm.methodSelected = "PUT";
+      const requestMethod = "PUT";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/tankOperationMode", "", body);
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/tankOperationMode", "", body);
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + arg;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = body;
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + arg;
       }
     },
     getTargetWaterHeatingTemperature: function () {
       console.log("getTargetWaterHeatingTemperatureがクリックされました。");
-      vm.methodSelected = "GET";
+      const requestMethod = "GET";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/targetWaterHeatingTemperature", "", "");
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/targetWaterHeatingTemperature", "", "");
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + vm.body;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = "";
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setTargetWaterHeatingTemperature: function () {
       console.log("setTargetWaterHeatingTemperatureがクリックされました。", this.waterHeaterTemperature);
       const body = '{"targetWaterHeatingTemperature":' + this.waterHeaterTemperature + '}';
-      vm.methodSelected = "PUT";
+      const requestMethod = "PUT";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const message = accessElServer(vm.scheme, vm.elApiServer, vm.apiKey, 
-          vm.methodSelected, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/targetWaterHeatingTemperature", "", body);
+          requestMethod, vm.prefix, "/devices", "/"+vm.device_id, "/properties", "/targetWaterHeatingTemperature", "", body);
         // REQUEST表示エリアのデータ設定
-        vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
-                      message.hostname + message.path + " " + this.waterHeaterTemperature;
+        vm.request = makeRequest(message.method, vm.scheme, message.hostname, message.path);
+        vm.requestBody = body;
+        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" + 
+        //               message.hostname + message.path + " " + this.waterHeaterTemperature;
       }
     }
   },
@@ -1152,14 +1207,14 @@ ws.onmessage = function(event){
     vm.statusCode = "RES status code: " + obj.statusCode;
     vm.response = obj.response;
     // RESPONSEをLOGに追加
-    g_dataLogArray.push({
-      timeStamp:timeStamp(),
-      direction:"RES",
-      data:obj
-    });
+    // g_dataLogArray.push({
+    //   timeStamp:timeStamp(),
+    //   direction:"RES",
+    //   data:obj
+    // });
     
     // LOG表示の更新
-    displayLog();
+    // displayLog();
   }
 
   // ECHONET Lite WebApi Serverからのresponse処理
@@ -1178,7 +1233,7 @@ ws.onmessage = function(event){
     console.log("serviceListの更新:", serviceList);
     vm.serviceList = serviceList;
     // 入力フィールドserviceの表示項目の更新
-    vm.serviceSelected = (serviceList[1]) ? serviceList[1] : "";
+    // vm.serviceSelected = (serviceList[1]) ? serviceList[1] : "";
   }
 
   // GET /elapi/v1/devices, groups, bulks, histories
@@ -1258,7 +1313,7 @@ ws.onmessage = function(event){
       // 入力フィールドidの表示項目の更新
       vm.idSelected = (vm.idInfoList[1]) ? vm.idInfoList[1].id : "";
       // Device Typeの表示項目の更新
-      updateDeviceType(vm.idSelected.slice(1));
+      // updateDeviceType(vm.idSelected.slice(1));
     }
   }
 
@@ -1338,7 +1393,7 @@ ws.onmessage = function(event){
     
     // 入力フィールドResouce TypeとResource Nameの表示項目の更新
     updateResourceName("GET", thingId, "/properties");
-    vm.resourceTypeSelected = (resourceTypeList[1]) ? resourceTypeList[1] : "";
+    // vm.resourceTypeSelected = (resourceTypeList[1]) ? resourceTypeList[1] : "";
 
     // 入力フィールドidの下のdeviceTypeの更新
     vm.deviceType = obj.response.deviceType;
@@ -1430,36 +1485,36 @@ ws.onmessage = function(event){
   g_flagSendButtonIsClicked = false;
 };
 
-function displayLog() {
-  let log = [];
-  for (let dataLog of g_dataLogArray) {
-    let message = {
-      id: dataLog.id,
-      timeStamp: dataLog.timeStamp,
-      direction: dataLog.direction,
-    };
-    if (dataLog.direction == 'REQ') { // REQUEST
-      message.body = dataLog.data.method + " https://"+dataLog.data.hostname+dataLog.data.path;
-    } else { // RESPONSE
-      message.statusCode = dataLog.data.statusCode;
-      message.body = dataLog.data.response;
-    }
-    log.push(message);
-  }
-  if (vm.rbOrder == "reverseOrder") {
-    log.reverse();
-  }
-  vm.message_list = log;
-}
+// function displayLog() {
+//   let log = [];
+//   for (let dataLog of g_dataLogArray) {
+//     let message = {
+//       id: dataLog.id,
+//       timeStamp: dataLog.timeStamp,
+//       direction: dataLog.direction,
+//     };
+//     if (dataLog.direction == 'REQ') { // REQUEST
+//       message.body = dataLog.data.method + " https://"+dataLog.data.hostname+dataLog.data.path;
+//     } else { // RESPONSE
+//       message.statusCode = dataLog.data.statusCode;
+//       message.body = dataLog.data.response;
+//     }
+//     log.push(message);
+//   }
+//   if (vm.rbOrder == "reverseOrder") {
+//     log.reverse();
+//   }
+//   vm.message_list = log;
+// }
 
 // ログ用に現在の時刻を取得する
-function timeStamp() {
-  const date = new Date();
-  let hour = date.getHours().toString();
-  let minute = date.getMinutes().toString();
-  let second = date.getSeconds().toString();
-  hour = (hour.length == 1) ? ("0" + hour) : hour;
-  minute = (minute.length == 1) ? ("0" + minute) : minute;
-  second = (second.length == 1) ? ("0" + second) : second;
-  return hour + ":" + minute + ":" + second;
-}
+// function timeStamp() {
+//   const date = new Date();
+//   let hour = date.getHours().toString();
+//   let minute = date.getMinutes().toString();
+//   let second = date.getSeconds().toString();
+//   hour = (hour.length == 1) ? ("0" + hour) : hour;
+//   minute = (minute.length == 1) ? ("0" + minute) : minute;
+//   second = (second.length == 1) ? ("0" + second) : second;
+//   return hour + ":" + minute + ":" + second;
+// }
