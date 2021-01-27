@@ -44,8 +44,6 @@ Node.jsがインストールされたWindows PC, Macまたは Linux
 
 画面左下の「操作ガイド」にしたがって操作してください。
 
-Get device info ボタンをクリックしたのち、家庭用エアコン（homeAirConditioner）、一般照明（generalLighting）、電気温水器(electricWaterHeater)の３種類のデバイスのアイコンが表示されない場合は、 設定画面から機器を追加してください。
-
 ## Note
 
-- 設定画面でhttpを選択することができるが、実装はしていない。
+Get device info ボタンをクリックしたのち、家庭用エアコン（homeAirConditioner）、一般照明（generalLighting）、電気温水器(electricWaterHeater)の３種類のデバイスのアイコンが表示されない場合は、 設定画面から機器を追加してください。
