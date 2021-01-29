@@ -28,9 +28,8 @@
 
     .navbar h1 {
       font-size: 100%;
-      /* margin-top: 0;
-      margin-bottom: 0; */
     }
+
     .window {
       padding-left: 0;
       padding-right: 0;
@@ -220,7 +219,6 @@
 
       <div class="row">
         <!-- Card: Left Window "Operation" -->
-        <!-- <div class="card col-7 px-0 mb-3"> -->
         <div class="card col-7 window">
           <div class="card-header">
             <div class="row">
@@ -237,16 +235,13 @@
           <div class="card-body p-2">
 
             <!-- Card: Device -->
-            <!-- <div class="card col-12 px-0 mb-1"> -->
             <div class="card">
               <div class="card-header">
                 <div class="row">
                   <h5>Device</h5>
-                  <!-- <div class="col-auto pt-1 h5">Device</div> -->
                   <div class="col"></div>
                   <!-- Get device info ボタン -->
                   <div class="col-auto">
-                    <!-- <div class="col-auto p-1"> -->
                     <button 
                       type="button" 
                       class="btn btn-secondary btn-sm" 
@@ -299,7 +294,6 @@
                   </div>
                 </div>
 
-                <!-- <div class="col px-0 border"> -->
                 <div class="col px-0">
                   <ul class="list-group request-response-list">
                     <li class="list-group-item">id: {{device_id}}</li>
@@ -312,16 +306,13 @@
             </div>
 
             <!-- Card: Device description -->
-            <!-- <div class="card col-12 px-0 mb-1"> -->
             <div class="card">
 
               <div class="card-header">
                 <div class="row">
                   <h5>Device description</h5>
-                  <!-- <div class="col-auto pt-1 h5">Device description</div> -->
                   <div class="col"></div>
                   <!-- Get device description ボタン -->
-                  <!-- <div class="col-auto p-1"> -->
                   <div class="col-auto">
                     <button 
                       type="button" 
@@ -353,15 +344,12 @@
             </div>
 
             <!-- Card: Property -->
-            <!-- <div class="card col-12 px-0 mb-1"> -->
             <div class="card">
               <div class="card-header">
                 <div class="row">
                   <h5>Property</h5>
-                  <!-- <div class="col-auto pt-1 h5">Property</div> -->
                   <div class="col"></div>
                   <!-- Get all property values ボタン -->
-                  <!-- <div class="col-auto p-1"> -->
                   <div class="col-auto">
                     <button 
                       type="button" 
@@ -392,16 +380,11 @@
 
         <!-- Card: Right Window -->
         <div class="card col-5 window">
-
-        <!-- <div class="card col-5 px-0 mb-3"> -->
           <div class="card-header">
             <div class="row">
-              <!-- <div class="pl-3 pt-1"> -->
-                <h5>Request & Response</h5>
-              <!-- </div> -->
+              <h5>Request & Response</h5>
               <div class="col"></div>
               <!-- Clear ボタン -->
-              <!-- <div class="col-auto p-1"> -->
               <div class="col-auto">
                 <button type="button" class="btn btn-secondary btn-sm" title="Clear" v-on:click="clearReqAndResButtonIsClicked">
                   Clear
