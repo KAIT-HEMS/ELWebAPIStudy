@@ -4,6 +4,7 @@
 <!-- Released under the MIT License. -->
 <!doctype html>
 <html lang="ja">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -16,118 +17,157 @@
       position: relative;
       min-height: 100%;
     }
+
     main.container {
-      padding: 70px 0 0;
+      padding: 40px 0 0;
     }
+
+    .navbar {
+      padding: 0;
+    }
+
     .navbar h1 {
       font-size: 100%;
-      margin-top: 0;
-      margin-bottom: 0;
+      /* margin-top: 0;
+      margin-bottom: 0; */
     }
+    .window {
+      padding-left: 0;
+      padding-right: 0;
+      margin-bottom: 1em;
+    }
+
     .card-deck {
       margin-bottom: 20px;
     }
+
     .card-header {
       padding: 0.1em 1em;
     }
+
+    .card-header h5 {
+      padding: 0 1em;
+    }
+
     .form-group {
       margin: 0;
       padding: 0;
     }
+
     .request-response-body {
       margin: 0;
       padding: 0;
     }
+
     .request-response-wrapper {
-      height: 42em;
+      height: 38em;
       overflow-y: scroll;
     }
+
     .request-response-list li {
       font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
       font-size: 90%;
       padding: 0.2em 1em;
     }
+
     #card-property-body {
       height: 10em;
     }
+
     #message-monitor-body {
       margin: 0;
       padding: 0;
     }
+
     #deviceDescription-wrapper {
-      height: 10em;
+      height: 8em;
       overflow-y: scroll;
     }
+
     #deviceDescription-list li {
       font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
       font-size: 90%;
       padding: 0.2em 1em;
       cursor: pointer;
     }
+
     #deviceDescription-list li span {
       display: inline-block;
     }
+
     #deviceDescription-list li span.col1 {
       width: 15em;
     }
+
     #deviceDescription-list li span.col2 {
       width: 15em;
     }
+
     #deviceDescription-list-header {
       font-weight: bold;
     }
+
     #setting-devices-body {
       margin: 0;
       padding: 0;
     }
+
     #setting-devices-list-wrapper {
       height: 30em;
       overflow-y: scroll;
     }
+
     #setting-devices-list li {
       font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
       font-size: 90%;
       padding: 0.2em 1em;
       cursor: pointer;
     }
+
     #setting-devices-list li span {
       display: inline-block;
     }
+
     #setting-devices-list li span.col1 {
       width: 20em;
     }
+
     #setting-devices-list li span.col2 {
       width: 30em;
     }
+
     #setting-devices-list li span.col3 {
       width: 4em;
     }
+
     /* slider value */
     .slider-value {
       text-align: center;
       font-size: 1em;
-      width: 40px; 
+      width: 40px;
       height: 10px;
       line-height: 10px;
       margin: 7px 0px 0px 5px;
     }
+
     /* slider horizontal bar */
     input[type="range"] {
-        display: block;
-        -webkit-appearance: none;
-        background-color: #bdc3c7;
-        width: 120px;
-        height: 5px;
-        outline: 0;
-        margin: 12px 0px 0px 10px;
+      display: block;
+      -webkit-appearance: none;
+      background-color: #bdc3c7;
+      width: 120px;
+      height: 5px;
+      outline: 0;
+      margin: 12px 0px 0px 10px;
     }
+
     /* slider knob */
     input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        background-color: #de1616;
-        width: 10px;
-        height: 20px;
-        border: 1px solid white;
+      -webkit-appearance: none;
+      background-color: #de1616;
+      width: 10px;
+      height: 20px;
+      border: 1px solid white;
     }
   </style>
 </head>
@@ -137,7 +177,7 @@
     <header>
       <div class="navbar navbar-expand-md navbar-dark fixed-top bg-dark d-block">
         <!-- App name -->
-        <h1 class="d-inline-block pl-5 ml-2">
+        <h1 class="d-inline-block pl-5 pt-1 pb-0 ml-2 mb-0">
           <router-link to="/home">
             <a class="navbar-brand">
               <span style="color:#FFFFFF;">ECHONET Lite WebAPI 学習 Tool</span>
@@ -169,8 +209,8 @@
     </header>
 
     <main role="main" class="container">
-			<router-view></router-view>
-		</main>
+      <router-view></router-view>
+    </main>
   </div>
 
   <!-- Template for Home page-->
@@ -180,15 +220,14 @@
 
       <div class="row">
         <!-- Card: Left Window "Operation" -->
-        <div class="card col-7 px-0 mb-3">
+        <!-- <div class="card col-7 px-0 mb-3"> -->
+        <div class="card col-7 window">
           <div class="card-header">
             <div class="row">
-              <div class="pl-3 pt-1">
-                <h5>Operation</h5>
-              </div>
+              <h5>Operation</h5>
               <div class="col"></div>
               <!-- Clear ボタン -->
-              <div class="col-auto p-1">
+              <div class="col-auto">
                 <button type="button" class="btn btn-secondary btn-sm" title="Clear" v-on:click="clearOperationButtonIsClicked">
                   Clear
                 </button>
@@ -198,15 +237,21 @@
           <div class="card-body p-2">
 
             <!-- Card: Device -->
-            <div class="card col-12 px-0 mb-1">
-
+            <!-- <div class="card col-12 px-0 mb-1"> -->
+            <div class="card">
               <div class="card-header">
                 <div class="row">
-                  <div class="col-auto pt-1 h5">Device</div>
+                  <h5>Device</h5>
+                  <!-- <div class="col-auto pt-1 h5">Device</div> -->
                   <div class="col"></div>
                   <!-- Get device info ボタン -->
-                  <div class="col-auto p-1">
-                    <button type="button" class="btn btn-secondary btn-sm" title="GET /devices" v-on:click="getDeviceInfoButtonIsClicked">
+                  <div class="col-auto">
+                    <!-- <div class="col-auto p-1"> -->
+                    <button 
+                      type="button" 
+                      class="btn btn-secondary btn-sm" 
+                      title="GET /devices" 
+                      v-on:click="getDeviceInfoButtonIsClicked">
                       Get device info
                     </button>
                   </div>
@@ -267,26 +312,29 @@
             </div>
 
             <!-- Card: Device description -->
-            <div class="card col-12 px-0 mb-1">
+            <!-- <div class="card col-12 px-0 mb-1"> -->
+            <div class="card">
+
               <div class="card-header">
                 <div class="row">
-                  <div class="col-auto pt-1 h5">Device description</div>
+                  <h5>Device description</h5>
+                  <!-- <div class="col-auto pt-1 h5">Device description</div> -->
                   <div class="col"></div>
                   <!-- Get device description ボタン -->
-                  <div class="col-auto p-1">
-                      <button 
-                        type="button" 
-                        class="btn btn-secondary btn-sm" 
-                        title="GET /devices/<id>" 
-                        v-on:click="getDeviceDescriptionButtonIsClicked" >
-                        Get device description
-                      </button>
+                  <!-- <div class="col-auto p-1"> -->
+                  <div class="col-auto">
+                    <button 
+                      type="button" 
+                      class="btn btn-secondary btn-sm" 
+                      title="GET /devices/<id>" 
+                      v-on:click="getDeviceDescriptionButtonIsClicked" >
+                      Get device description
+                    </button>
                   </div>
                 </div>
               </div>
 
               <div class="card-body py-0">
-
                 <div id="deviceDescription-wrapper">
                   <ul class="list-group" id="deviceDescription-list">
                     <li class="list-group-item d-flex align-items-start" id="deviceDescription-list-header">
@@ -301,18 +349,20 @@
                     </li>
                   </ul>
                 </div>
-
               </div>
             </div>
 
             <!-- Card: Property -->
-            <div class="card col-12 px-0 mb-1">
+            <!-- <div class="card col-12 px-0 mb-1"> -->
+            <div class="card">
               <div class="card-header">
                 <div class="row">
-                  <div class="col-auto pt-1 h5">Property</div>
+                  <h5>Property</h5>
+                  <!-- <div class="col-auto pt-1 h5">Property</div> -->
                   <div class="col"></div>
                   <!-- Get all property values ボタン -->
-                  <div class="col-auto p-1">
+                  <!-- <div class="col-auto p-1"> -->
+                  <div class="col-auto">
                     <button 
                       type="button" 
                       class="btn btn-secondary btn-sm" 
@@ -341,15 +391,18 @@
         </div>
 
         <!-- Card: Right Window -->
-        <div class="card col-5 px-0 mb-3">
+        <div class="card col-5 window">
+
+        <!-- <div class="card col-5 px-0 mb-3"> -->
           <div class="card-header">
             <div class="row">
-              <div class="pl-3 pt-1">
+              <!-- <div class="pl-3 pt-1"> -->
                 <h5>Request & Response</h5>
-              </div>
+              <!-- </div> -->
               <div class="col"></div>
               <!-- Clear ボタン -->
-              <div class="col-auto p-1">
+              <!-- <div class="col-auto p-1"> -->
+              <div class="col-auto">
                 <button type="button" class="btn btn-secondary btn-sm" title="Clear" v-on:click="clearReqAndResButtonIsClicked">
                   Clear
                 </button>
@@ -519,4 +572,5 @@
   <script src="/elwebapistudy.js"></script>
 
 </body>
+
 </html>
