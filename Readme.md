@@ -1,6 +1,6 @@
 # ELWebAPIStudy
 
-2021.01.20
+2021.02.05
 
 ## Abstract
 
@@ -16,24 +16,29 @@ Node.jsがインストールされたWindows PC, Macまたは Linux
 ## Installation
 
 1. zip fileを解凍する
-2. 解凍したフォルダーに移動し、ターミナルで expressとwsをnpmでインストールする
+2. 解凍したフォルダーに移動し、ターミナルで以下を実行し、必要なモジュールをインストールする
 
 ```
-  npm i express
-  npm i ws   
+npm i
 ```
 
-## Launch
+## Web アプリ版の起動
 
-1. 解凍したフォルダーに移動し、ターミナルで以下のコマンドを実行する   
+1. 解凍したフォルダーに移動し、ターミナルで以下のコマンドを実行する
 
-  ```
-    node index.js
-  ```
+```
+node index.js
+```
 
 2. Web Browserを起動し、localhost:3020 をアクセスする  
 
 3. 設定画面でapiKeyを入力する
+
+## electron版 アプリ版の起動
+
+```
+npm start
+```
 
 ## 設定
 

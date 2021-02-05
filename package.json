@@ -1,21 +1,57 @@
 {
-  "name": "elwebapitool",
+  "name": "elapi-study",
   "version": "0.1.0",
-  "description": "ECHONET Lite Web API tool",
-  "main": "index.js",
+  "description": "ECHONET Lite Web API study tool",
+  "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
-  "bin": {
-    "elwebapitool": "./index.js"
-  },
+  "keywords": [],
   "author": "Hiroyuki Fujita",
   "files": [
     "html/*"
   ],
   "license": "MIT",
   "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.54",
+    "@electron-forge/maker-deb": "^6.0.0-beta.54",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.54",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
+    "@electron-forge/maker-zip": "^6.0.0-beta.54",
+    "electron": "^11.2.1"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
     "express": "^4.17.1",
-    "ws": "^7.3.0"
+    "ws": "^7.4.2"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "elapi_study"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
   }
 }
