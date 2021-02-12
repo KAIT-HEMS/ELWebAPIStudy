@@ -118,7 +118,8 @@ wss.on("connection", ws => {
 // config.jsonのupdate (writeFile config.json)
 function updateConfig(data){ // data:string, config.json用のデータ
   const buffer = Buffer.from(data);
-  fs.writeFile("config.json", buffer, (err) => {
+  // fs.writeFile("config.json", buffer, (err) => {
+  fs.writeFile(configPath, buffer, (err) => {
     if (err) console.log("Error: Can not save config.json.");
     console.log('\nconfig.json has been saved!');
   });
@@ -185,24 +186,24 @@ function sendRequest(hostname, path, method, headers, body) {
 }
 
 // logの保存。file nameはtimestampを利用する
-function saveLog(data) {  // data:string
-  const date = new Date();
-  let year = date.getFullYear();
-  let month = (date.getMonth()+1).toString();
-  let day = date.getDate().toString();
-  let hour = date.getHours().toString();
-  let minute = date.getMinutes().toString();
-  let second = date.getSeconds().toString();
-  month = (month.length == 1) ? ("0" + month) : month;
-  day = (day.length == 1) ? ("0" + day) : day;
-  hour = (hour.length == 1) ? ("0" + hour) : hour;
-  minute = (minute.length == 1) ? ("0" + minute) : minute;
-  second = (second.length == 1) ? ("0" + second) : second;
-  const filename = "log_" + year + month + day + hour + minute + second  + ".txt";
+// function saveLog(data) {  // data:string
+//   const date = new Date();
+//   let year = date.getFullYear();
+//   let month = (date.getMonth()+1).toString();
+//   let day = date.getDate().toString();
+//   let hour = date.getHours().toString();
+//   let minute = date.getMinutes().toString();
+//   let second = date.getSeconds().toString();
+//   month = (month.length == 1) ? ("0" + month) : month;
+//   day = (day.length == 1) ? ("0" + day) : day;
+//   hour = (hour.length == 1) ? ("0" + hour) : hour;
+//   minute = (minute.length == 1) ? ("0" + minute) : minute;
+//   second = (second.length == 1) ? ("0" + second) : second;
+//   const filename = "log_" + year + month + day + hour + minute + second  + ".txt";
   
-  const buffer = Buffer.from(data);
-  fs.writeFile("log/"+filename, buffer, (err) => {
-    if (err) console.log("Error: Can not save a log file.");
-    console.log('\nA log file is saved!');
-  });
-}
+//   const buffer = Buffer.from(data);
+//   fs.writeFile("log/"+filename, buffer, (err) => {
+//     if (err) console.log("Error: Can not save a log file.");
+//     console.log('\nA log file is saved!');
+//   });
+// }
