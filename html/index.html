@@ -240,14 +240,14 @@
                 <div class="row">
                   <h5>Device</h5>
                   <div class="col"></div>
-                  <!-- Get device info ボタン -->
+                  <!-- 機器一覧取得 ボタン -->
                   <div class="col-auto">
                     <button 
                       type="button" 
                       class="btn btn-secondary btn-sm" 
                       title="GET /devices" 
                       v-on:click="getDeviceInfoButtonIsClicked">
-                      Get device info
+                      機器一覧取得
                     </button>
                   </div>
                 </div>
@@ -312,14 +312,14 @@
                 <div class="row">
                   <h5>Device description</h5>
                   <div class="col"></div>
-                  <!-- Get device description ボタン -->
+                  <!-- 機器情報取得ボタン -->
                   <div class="col-auto">
                     <button 
                       type="button" 
                       class="btn btn-secondary btn-sm" 
                       title="GET /devices/<id>" 
                       v-on:click="getDeviceDescriptionButtonIsClicked" >
-                      Get device description
+                      機器情報取得
                     </button>
                   </div>
                 </div>
@@ -349,14 +349,14 @@
                 <div class="row">
                   <h5>Property</h5>
                   <div class="col"></div>
-                  <!-- Get all property values ボタン -->
+                  <!-- 全プロパティ値取得ボタン -->
                   <div class="col-auto">
                     <button 
                       type="button" 
                       class="btn btn-secondary btn-sm" 
                       title="Get /devices/<id>/properties" 
                       v-on:click="getAllPropertyValuesButtonIsClicked" >
-                      Get all property values
+                      全プロパティ値取得
                     </button>
                   </div>
                 </div>
@@ -537,7 +537,7 @@
         実験サーバーについては
         <a href=https://echonet.jp/m_only/web_api_cloud/ target="_blank" rel="noreferrer">こちらの会員限定ページ</a>を参照ください。<br>
         このツールは現在、家庭用エアコン（homeAirConditioner）、一般照明（generalLighting）、電気温水器(electricWaterHeater)に対応しています。
-        Get device info ボタンをクリックしたのち、上記の３種類のデバイスのアイコンが表示されない場合は、
+        機器一覧取得 ボタンをクリックしたのち、上記の３種類のデバイスのアイコンが表示されない場合は、
         設定画面から機器を追加してください。
 
       <h4>apiKeyについて</h4>
