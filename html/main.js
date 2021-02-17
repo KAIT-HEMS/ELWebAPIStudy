@@ -10,7 +10,7 @@
 "use strict";
 
 const g_serverURL = "/elwebapistudy/"; // SPAのweb serverのURL
-let g_thingInfo = {}; // 　} // }
+let g_thingInfo = {};
 // thing id(device id, group id, bulk id, history id)をkeyとして、以下の項目を保持
 // serviceがdevice以外の場合は、"deviceType":""
 // {
@@ -23,6 +23,9 @@ let g_flagSendButtonIsClicked = false; // Request & Responseに不要なデー�
 let g_flagIsBootProcess = false; // 起動時に機器一覧を取得した時に処理が必要。その区別のため。
 
 let bind_data = {
+  // Software version
+  version: "v0.2.0",
+
   // data in config.json
   scheme: "",
   elApiServer: "",
@@ -63,7 +66,7 @@ let bind_data = {
   idSelected: "",
   idToolTip: "XXX",
   deviceType: "",
-  resourceTypeList: [], // [/properties, /actons]
+  // resourceTypeList: [], // [/properties, /actons]
   // resourceTypeSelected: "",
   resourceNameList: [], // [/airFlowLevel, /roomTemperature,...]
   // resourceNameSelected:"",
@@ -177,11 +180,9 @@ const template_home = {
         message.path
       );
       this.requestBody = "";
-      // this.request = "REQ " + message.method + " " + this.scheme + "://" +
-      //               message.hostname + message.path + " " + this.body;
     },
     clearOperationButtonIsClicked: function () {
-      console.log("clearOperation ボタンがクリックされました。");
+      console.log("Clear-Operation ボタンがクリックされました。");
       this.deviceSelected = "";
       this.graphicLighting = "off";
       this.graphicAircon = "off";
@@ -200,8 +201,12 @@ const template_home = {
       console.log("照明が選択されました。");
       this.deviceSelected = "lighting";
       this.graphicLighting = "selected";
-      this.graphicAircon = "notSelected";
-      this.graphicWaterHeater = "notSelected";
+      if (this.graphicAircon !== "off") {
+        this.graphicAircon = "notSelected";
+      }
+      if (this.graphicWaterHeater !== "off") {
+        this.graphicWaterHeater = "notSelected";
+      }
       this.device_id = this.lighting.id;
       this.device_deviceType = this.lighting.deviceType;
       this.device_version = this.lighting.version;
@@ -211,9 +216,13 @@ const template_home = {
     airconIsClicked: function () {
       console.log("エアコンが選択されました。");
       this.deviceSelected = "aircon";
-      this.graphicLighting = "notSelected";
+      if (this.graphicLighting !== "off") {
+        this.graphicLighting = "notSelected";
+      }
       this.graphicAircon = "selected";
-      this.graphicWaterHeater = "notSelected";
+      if (this.graphicWaterHeater !== "off") {
+        this.graphicWaterHeater = "notSelected";
+      }
       this.device_id = this.aircon.id;
       this.device_deviceType = this.aircon.deviceType;
       this.device_version = this.aircon.version;
@@ -223,8 +232,12 @@ const template_home = {
     waterHeaterIsClicked: function () {
       console.log("温水器が選択されました。");
       this.deviceSelected = "waterHeater";
-      this.graphicLighting = "notSelected";
-      this.graphicAircon = "notSelected";
+      if (this.graphicLighting !== "off") {
+        this.graphicLighting = "notSelected";
+      }
+      if (this.graphicAircon !== "off") {
+        this.graphicAircon = "notSelected";
+      }
       this.graphicWaterHeater = "selected";
       this.device_id = this.waterHeater.id;
       this.device_deviceType = this.waterHeater.deviceType;
@@ -233,7 +246,7 @@ const template_home = {
       this.propertyInfoArray = this.waterHeater.propertyInfoArray;
     },
     getDeviceDescriptionButtonIsClicked: function () {
-      console.log("getDeviceDescription ボタンがクリックされました。");
+      console.log("機器情報取得 ボタンがクリックされました。");
       if (this.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const requestMethod = "GET";
@@ -258,12 +271,10 @@ const template_home = {
           message.path
         );
         this.requestBody = "";
-        // this.request = "REQ " + message.method + " " + this.scheme + "://" +
-        //             message.hostname + message.path + " " + this.body;
       }
     },
     getAllPropertyValuesButtonIsClicked: function () {
-      console.log("getAllPropertyValues ボタンがクリックされました。");
+      console.log("全プロパティ値取得 ボタンがクリックされました。");
       if (this.device_id !== "") {
         g_flagSendButtonIsClicked = true;
         const requestMethod = "GET";
@@ -288,8 +299,6 @@ const template_home = {
           message.path
         );
         this.requestBody = "";
-        // this.request = "REQ " + message.method + " " + this.scheme + "://" +
-        //             message.hostname + message.path + " " + this.body;
       }
     },
     setAirconOperationStatusOnButtonIsClicked: function () {
@@ -302,7 +311,7 @@ const template_home = {
       console.log("getAirconOperationStatus ボタンがクリックされました。");
     },
     clearReqAndResButtonIsClicked: function () {
-      console.log("clearReqAndRes ボタンがクリックされました。");
+      console.log("Clear-ReqAndRes ボタンがクリックされました。");
       this.request = "request:";
       this.requestBody = "request body";
       this.statusCode = "response: status code";
@@ -332,7 +341,10 @@ const template_setting = {
     // デバイス削除ボタン(Trash can)がクリックされたときの処理
     deleteDeviceButtonIsClicked: function (value) {
       const deviceId = vm.idInfoList[value].id;
-      console.log("deleteDeviceButtonIsClicked is clicked, value=", deviceId.slice(1));
+      console.log(
+        "deleteDeviceButtonIsClicked is clicked, value=",
+        deviceId.slice(1)
+      );
       accessElServerDeleteDevice(
         this.scheme,
         this.elApiServer,
@@ -539,31 +551,31 @@ function saveConfig(configData) {
   request.send(JSON.stringify(message));
 }
 
-function updateResourceName(requestMethod, idSelected, resourceTypeSelected) {
-  console.log(
-    "updateResourceName ",
-    requestMethod,
-    idSelected,
-    resourceTypeSelected
-  );
-  let resourceNameList = [];
-  if (resourceTypeSelected !== "") {
-    const thingInfo = g_thingInfo[idSelected];
-    if (thingInfo !== undefined) {
-      if (resourceTypeSelected == "/properties" && requestMethod == "GET") {
-        resourceNameList = thingInfo.propertyList;
-      }
-      if (resourceTypeSelected == "/properties" && requestMethod == "PUT") {
-        resourceNameList = thingInfo.propertyListWritable;
-      }
-      if (resourceTypeSelected == "/actions" && requestMethod == "POST") {
-        resourceNameList = thingInfo.actionList;
-      }
-      vm.resourceNameList = resourceNameList;
-      // vm.resourceNameSelected = (resourceNameList[1]) ? resourceNameList[1] : "";
-    }
-  }
-}
+// function updateResourceName(requestMethod, idSelected, resourceTypeSelected) {
+//   console.log(
+//     "updateResourceName ",
+//     requestMethod,
+//     idSelected,
+//     resourceTypeSelected
+//   );
+//   let resourceNameList = [];
+//   if (resourceTypeSelected !== "") {
+//     const thingInfo = g_thingInfo[idSelected];
+//     if (thingInfo !== undefined) {
+//       if (resourceTypeSelected == "/properties" && requestMethod == "GET") {
+//         resourceNameList = thingInfo.propertyList;
+//       }
+//       if (resourceTypeSelected == "/properties" && requestMethod == "PUT") {
+//         resourceNameList = thingInfo.propertyListWritable;
+//       }
+//       if (resourceTypeSelected == "/actions" && requestMethod == "POST") {
+//         resourceNameList = thingInfo.actionList;
+//       }
+//       vm.resourceNameList = resourceNameList;
+//       // vm.resourceNameSelected = (resourceNameList[1]) ? resourceNameList[1] : "";
+//     }
+//   }
+// }
 
 // Home画面Left window - Property section - 照明
 Vue.component("ctrl-lighting", {
@@ -602,7 +614,6 @@ Vue.component("ctrl-lighting", {
         return this.brightnessValue;
       },
       set(value) {
-        // console.log(value);
         this.brightnessValue = value;
       },
     },
@@ -634,9 +645,6 @@ Vue.component("ctrl-lighting", {
           message.path
         );
         vm.requestBody = "";
-
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setOperationStatus: function (arg) {
@@ -666,8 +674,6 @@ Vue.component("ctrl-lighting", {
           message.path
         );
         vm.requestBody = body;
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + arg;
       }
     },
     getOperationMode: function () {
@@ -696,8 +702,6 @@ Vue.component("ctrl-lighting", {
           message.path
         );
         vm.requestBody = "";
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setOperationMode: function (arg) {
@@ -727,8 +731,6 @@ Vue.component("ctrl-lighting", {
           message.path
         );
         vm.requestBody = body;
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + arg;
       }
     },
     getBrightness: function () {
@@ -757,8 +759,6 @@ Vue.component("ctrl-lighting", {
           message.path
         );
         vm.requestBody = "";
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setBrightness: function () {
@@ -791,8 +791,6 @@ Vue.component("ctrl-lighting", {
           message.path
         );
         vm.requestBody = body;
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + this.lightingBrightness;
       }
     },
   },
@@ -801,7 +799,7 @@ Vue.component("ctrl-lighting", {
     <table class="table table-sm m-0">
       <thead>
         <th>プロパティ名</th>
-        <th>設定</th>
+        <th>操作（値設定）</th>
         <th>値取得</th>
       </thead>
       <tr>
@@ -883,7 +881,6 @@ Vue.component("ctrl-aircon", {
         return this.temperature;
       },
       set(value) {
-        // console.log(value);
         this.temperature = value;
       },
     },
@@ -915,8 +912,6 @@ Vue.component("ctrl-aircon", {
           message.path
         );
         vm.requestBody = "";
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setOperationStatus: function (arg) {
@@ -946,8 +941,6 @@ Vue.component("ctrl-aircon", {
           message.path
         );
         vm.requestBody = body;
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + arg;
       }
     },
     getOperationMode: function () {
@@ -976,8 +969,6 @@ Vue.component("ctrl-aircon", {
           message.path
         );
         vm.requestBody = "";
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setOperationMode: function (arg) {
@@ -1007,8 +998,6 @@ Vue.component("ctrl-aircon", {
           message.path
         );
         vm.requestBody = body;
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + arg;
       }
     },
     getTargetTemperature: function () {
@@ -1037,8 +1026,6 @@ Vue.component("ctrl-aircon", {
           message.path
         );
         vm.requestBody = "";
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setTargetTemperature: function () {
@@ -1071,8 +1058,6 @@ Vue.component("ctrl-aircon", {
           message.path
         );
         vm.requestBody = body;
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + this.airconTemperature;
       }
     },
   },
@@ -1081,7 +1066,7 @@ Vue.component("ctrl-aircon", {
     <table class="table table-sm m-0">
       <thead>
         <th>プロパティ名</th>
-        <th>設定</th>
+        <th>操作（値設定）</th>
         <th>値取得</th>
       </thead>
       <tr>
@@ -1163,7 +1148,6 @@ Vue.component("ctrl-waterHeater", {
         return this.temperature;
       },
       set(value) {
-        // console.log(value);
         this.temperature = value;
       },
     },
@@ -1195,8 +1179,6 @@ Vue.component("ctrl-waterHeater", {
           message.path
         );
         vm.requestBody = "";
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setOperationStatus: function (arg) {
@@ -1226,8 +1208,6 @@ Vue.component("ctrl-waterHeater", {
           message.path
         );
         vm.requestBody = body;
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + arg;
       }
     },
     getTankOperationMode: function () {
@@ -1256,8 +1236,6 @@ Vue.component("ctrl-waterHeater", {
           message.path
         );
         vm.requestBody = "";
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setTankOperationMode: function (arg) {
@@ -1287,8 +1265,6 @@ Vue.component("ctrl-waterHeater", {
           message.path
         );
         vm.requestBody = body;
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + arg;
       }
     },
     getTargetWaterHeatingTemperature: function () {
@@ -1317,8 +1293,6 @@ Vue.component("ctrl-waterHeater", {
           message.path
         );
         vm.requestBody = "";
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + vm.body;
       }
     },
     setTargetWaterHeatingTemperature: function () {
@@ -1352,8 +1326,6 @@ Vue.component("ctrl-waterHeater", {
           message.path
         );
         vm.requestBody = body;
-        // vm.request = "REQ " + message.method + " " + vm.scheme + "://" +
-        //               message.hostname + message.path + " " + this.waterHeaterTemperature;
       }
     },
   },
@@ -1362,7 +1334,7 @@ Vue.component("ctrl-waterHeater", {
     <table class="table table-sm m-0">
       <thead>
         <th>プロパティ名</th>
-        <th>設定</th>
+        <th>操作（値設定）</th>
         <th>値取得</th>
       </thead>
       <tr>
@@ -1489,7 +1461,7 @@ function reqListener() {
   // - ELWebAPI Server からのresponseは非同期処理、websocketで通知される。
   // - したがって以下の処理はwebsocketの受信処理で記述する。
   //   - 取得した機器一覧の中に、エアコン・照明・電気温水器があるかどうかを確認する
-  //   - なければ、APIで Server に作成する
+  //   - なければ、APIで Server に作成依頼をする
 }
 
 const request = new XMLHttpRequest();
@@ -1511,7 +1483,6 @@ ws.onmessage = function (event) {
   // 起動時処理 or 通常時処理
   if (g_flagIsBootProcess) {
     // 起動時処理
-    // console.log("起動時処理 in websocket 受信", obj.response.devices);
     console.log("起動時処理 in websocket 受信");
     let generalLightingIsFound = false;
     let homeAirConditionerIsFound = false;
@@ -1530,7 +1501,7 @@ ws.onmessage = function (event) {
     }
 
     if (!generalLightingIsFound) {
-      // APIで generalLighting を作成
+      // Serverに照明が存在しない場合、APIで generalLighting を作成
       console.log("Create generalLighting on the server");
       accessElServerAddDevice(
         vm.scheme,
@@ -1541,7 +1512,7 @@ ws.onmessage = function (event) {
       );
     }
     if (!homeAirConditionerIsFound) {
-      // APIで homeAirConditioner を作成
+      // Serverにエアコンが存在しない場合、APIで homeAirConditioner を作成
       console.log("Create homeAirConditioner on the server");
       accessElServerAddDevice(
         vm.scheme,
@@ -1552,7 +1523,7 @@ ws.onmessage = function (event) {
       );
     }
     if (!electricWaterHeaterIsFound) {
-      // APIで electricWaterHeater を作成
+      // Serverに電気温水器が存在しない場合、APIで electricWaterHeater を作成
       console.log("Create electricWaterHeater on the server");
       accessElServerAddDevice(
         vm.scheme,
@@ -1562,7 +1533,6 @@ ws.onmessage = function (event) {
         "electricWaterHeater"
       );
     }
-
   } else {
     // 通常時処理
 
@@ -1739,22 +1709,22 @@ ws.onmessage = function (event) {
       g_thingInfo[thingId] = thingInfo;
       console.log("g_thingInfo", g_thingInfo);
 
-      // resourceTypeListを新規に作成する
-      let resourceTypeList = [""];
-      if (obj.response.properties !== undefined) {
-        resourceTypeList.push("/properties");
-      }
-      if (obj.response.actions !== undefined) {
-        resourceTypeList.push("/actions");
-      }
-      if (obj.response.events !== undefined) {
-        resourceTypeList.push("/events");
-      }
-      console.log("resourceTypeListの更新:", resourceTypeList);
-      vm.resourceTypeList = resourceTypeList;
+      // // resourceTypeListを新規に作成する
+      // let resourceTypeList = [""];
+      // if (obj.response.properties !== undefined) {
+      //   resourceTypeList.push("/properties");
+      // }
+      // if (obj.response.actions !== undefined) {
+      //   resourceTypeList.push("/actions");
+      // }
+      // if (obj.response.events !== undefined) {
+      //   resourceTypeList.push("/events");
+      // }
+      // console.log("resourceTypeListの更新:", resourceTypeList);
+      // vm.resourceTypeList = resourceTypeList;
 
       // 入力フィールドResouce TypeとResource Nameの表示項目の更新
-      updateResourceName("GET", thingId, "/properties");
+      // updateResourceName("GET", thingId, "/properties");
       // vm.resourceTypeSelected = (resourceTypeList[1]) ? resourceTypeList[1] : "";
 
       // 入力フィールドidの下のdeviceTypeの更新

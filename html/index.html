@@ -1,5 +1,5 @@
 <!-- index.html for elwebapistudy-->
-<!-- 2021.01.27 -->
+<!-- 2021.02.17 -->
 <!-- Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium -->
 <!-- Released under the MIT License. -->
 <!doctype html>
@@ -18,39 +18,33 @@
       min-height: 100%;
     }
 
-    main.container {
-      padding: 40px 0 0;
+    main.container-fluid {
+      padding: 42px 0 0;
     }
 
     .navbar {
       padding: 0;
     }
 
-    .navbar h1 {
-      font-size: 100%;
+    .home-left {
+      /* padding-left: 0; */
+      padding-right: 0;
+      margin-bottom: 1em;
     }
 
-    .window {
+    .home-right {
       padding-left: 0;
       padding-right: 0;
       margin-bottom: 1em;
     }
 
-    .card-deck {
-      margin-bottom: 20px;
-    }
-
     .card-header {
       padding: 0.1em 1em;
+      /* padding: 0 1em; */
     }
 
     .card-header h5 {
       padding: 0 1em;
-    }
-
-    .form-group {
-      margin: 0;
-      padding: 0;
     }
 
     .request-response-body {
@@ -71,11 +65,6 @@
 
     #card-property-body {
       height: 10em;
-    }
-
-    #message-monitor-body {
-      margin: 0;
-      padding: 0;
     }
 
     #deviceDescription-wrapper {
@@ -172,42 +161,48 @@
 </head>
 
 <body>
-  <div class="container" id="app">
+  <div id="app">
     <header>
       <div class="navbar navbar-expand-md navbar-dark fixed-top bg-dark d-block">
         <!-- App name -->
-        <h1 class="d-inline-block pl-5 pt-1 pb-0 ml-2 mb-0">
+        <div class="d-inline-block ml-3 mb-0">
           <router-link to="/home">
-            <a class="navbar-brand">
-              <span style="color:#FFFFFF;">ECHONET Lite WebAPI 学習 Tool</span>
-            </a>
+            <div class="navbar-brand">
+              <span style="color:#FFFFFF;">ECHONET Lite WebAPI 学習用アプリ</span>
+            </div>
           </router-link>
-        </h1>
+        </div>
 
-        <div class="d-inline-block float-right pr-5 mr-2">
+        <div class="d-inline ml-2 mb-0">
+          <div class="navbar-text">
+            <span style="color:#FFFFFF;">{{version}}</span>
+          </div>
+        </div>
+
+        <div class="d-inline-block float-right mr-3">
           <!-- ホームボタン -->
           <router-link to="/home">
-            <a class="btn" title="Back to the home">
-              <i class="fas fa-home" style="color:#FFFFFF;"></i>
-            </a>
+            <div class="btn" title="Back to the home">
+              <span class="fas fa-home" style="color:#FFFFFF;"></span>
+            </div>
           </router-link>
           <!-- 設定ボタン -->
           <router-link to="/setting">
-            <a class="btn" title="Setting">
-              <i class="fas fa-cog" style="color:#FFFFFF;"></i>
-            </a>
+            <div class="btn" title="Setting">
+              <span class="fas fa-cog" style="color:#FFFFFF;"></span>
+            </div>
           </router-link>
           <!-- HELPボタン -->
           <router-link to="/help">
-            <a class="btn" title="Help">
-              <i class="fas fa-question-circle" style="color:#FFFFFF;"></i>
-            </a>
+            <div class="btn" title="Help">
+              <span class="fas fa-question-circle" style="color:#FFFFFF;"></span>
+            </div>
           </router-link>
         </div>
       </div>
     </header>
 
-    <main role="main" class="container">
+    <main role="main" class="container-fluid">
       <router-view></router-view>
     </main>
   </div>
@@ -215,11 +210,10 @@
   <!-- Template for Home page-->
   <script type="text/x-template" id="tmpl-page-home">
     <div>
-
-
       <div class="row">
-        <!-- Card: Left Window "Operation" -->
-        <div class="card col-7 window">
+
+        <!-- Card: Left column "Operation" -->
+        <div class="card col-7 home-left">
           <div class="card-header">
             <div class="row">
               <h5>Operation</h5>
@@ -232,6 +226,7 @@
               </div>
             </div>
           </div>
+
           <div class="card-body p-2">
 
             <!-- Card: Device -->
@@ -306,7 +301,7 @@
             </div>
 
             <!-- Card: Device description -->
-            <div class="card">
+            <div class="card mt-1">
 
               <div class="card-header">
                 <div class="row">
@@ -344,7 +339,7 @@
             </div>
 
             <!-- Card: Property -->
-            <div class="card">
+            <div class="card mt-1">
               <div class="card-header">
                 <div class="row">
                   <h5>Property</h5>
@@ -379,13 +374,13 @@
         </div>
 
         <!-- Card: Right Window -->
-        <div class="card col-5 window">
+        <div class="card col-5 home-right">
           <div class="card-header">
             <div class="row">
               <h5>Request & Response</h5>
               <div class="col"></div>
               <!-- Clear ボタン -->
-              <div class="col-auto">
+              <div class="col-auto mr-3">
                 <button type="button" class="btn btn-secondary btn-sm" title="Clear" v-on:click="clearReqAndResButtonIsClicked">
                   Clear
                 </button>
@@ -405,7 +400,6 @@
           </div>
 
         </div>
-
 
     </div>  
   </script>
@@ -528,23 +522,25 @@
 
   <!-- Template for Help page-->
   <script type="text/x-template" id="tmpl-page-help">
-    <div>
-      <h4>ECHONET Lite WebAPI 学習 Toolについて</h4>
-      <p>この Tool は、エコーネットコンソーシアムが策定した
-        <a href=https://echonet.jp/web_api/#guideline target="_blank" rel="noreferrer">ECHONET Lite WebAPI</a>
-        の仕様を学習するためのツールです。<br>
-        エコーネットコンソーシアムが会員向けに運用している実験サーバーへのアクセスを想定しています。<br>
-        実験サーバーについては
-        <a href=https://echonet.jp/m_only/web_api_cloud/ target="_blank" rel="noreferrer">こちらの会員限定ページ</a>を参照ください。<br>
-        このツールは現在、家庭用エアコン（homeAirConditioner）、一般照明（generalLighting）、電気温水器(electricWaterHeater)に対応しています。
-        機器一覧取得 ボタンをクリックしたのち、上記の３種類のデバイスのアイコンが表示されない場合は、
-        設定画面から機器を追加してください。
-
-      <h4>apiKeyについて</h4>
-      <p>このツールを使って実験サーバーにアクセスするには、あらかじめユーザー登録を行い、apiKeyの取得が必要です。<br>
-      ユーザー登録は、上記の会員限定ページから行うことができます。<br>
-      この Tool の設定画面でapiKeyを入力したのち、設定保存ボタンをクリックしてください。
-      </p>
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">ECHONET Lite WebAPI 学習用アプリについて</h5>
+        <p class="card-text">
+          ECHONET Lite WebAPI 学習用アプリは、エコーネットコンソーシアムが策定した
+          <a href=https://echonet.jp/web_api/#guideline target="_blank" rel="noreferrer">ECHONET Lite WebAPI</a>
+          の仕様を学習するためのアプリです。
+          リモコンライクなUIを操作すると、ECHONET Lite WebAPI を使ったリクエストをサーバーへ送信します。
+          サーバーへのリクエストとサーバーからのレスポンスを画面に表示します。
+        </p>
+        <p>
+          機器リストの取得・機器情報の取得・動作設定と状態取得という一連の操作を行い、それぞれの操作に対応するリクエスト＆レスポンスを確認することで、ECHONET Lite WebAPIの仕組みを理解することができます。
+          このアプリは、家庭用エアコン（homeAirConditioner）、一般照明（generalLighting）、電気温水器(electricWaterHeater)に対応しています。
+        </p>
+        <p>
+          エコーネットコンソーシアムが会員向けに運用している実験クラウドを ECHONET Lite WebAPI Server として利用します。
+          本アプリを利用するには、あらかじめエコーネットコンソーシアムの会員ページから実験クラウドの利用登録を行い、 APIkey を取得してください。
+        </p>
+      </div>
     </div>
   </script>
 

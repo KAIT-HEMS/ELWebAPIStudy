@@ -1,6 +1,6 @@
 {
   "name": "elapi-study",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "ECHONET Lite Web API study tool",
   "main": "main.js",
   "scripts": {
