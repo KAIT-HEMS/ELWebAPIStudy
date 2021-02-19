@@ -1,6 +1,6 @@
 {
   "name": "elapi-study",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "ECHONET Lite Web API study tool",
   "main": "main.js",
   "scripts": {
@@ -8,24 +8,32 @@
     "package": "electron-forge package",
     "make": "electron-forge make"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KAIT-HEMS/ELWebAPIStudy.git"
+  },
   "keywords": [],
   "author": "Hiroyuki Fujita",
+  "license": "MIT",
   "files": [
     "html/*"
   ],
-  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/KAIT-HEMS/ELWebAPIStudy/issues"
+  },
+  "homepage": "https://github.com/KAIT-HEMS/ELWebAPIStudy#readme",
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.54",
     "@electron-forge/maker-deb": "^6.0.0-beta.54",
     "@electron-forge/maker-rpm": "^6.0.0-beta.54",
     "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
     "@electron-forge/maker-zip": "^6.0.0-beta.54",
-    "electron": "^11.2.1"
+    "electron": "^11.2.3"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
     "express": "^4.17.1",
-    "ws": "^7.4.2"
+    "ws": "^7.4.3"
   },
   "config": {
     "forge": {

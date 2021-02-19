@@ -1,5 +1,5 @@
 // main.js for elwebapistudy(client side)
-// 2021.02.15
+// 2021.02.19
 // Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium
 // Released under the MIT License.
 //
@@ -20,11 +20,12 @@ let g_thingInfo = {};
 //     "propertyListWritable":[<resourceName>]
 //     "actionList":[<resourceName>]
 let g_flagSendButtonIsClicked = false; // Request & Responseに不要なデータを表示しないためのflag
-let g_flagIsBootProcess = false; // 起動時に機器一覧を取得した時に処理が必要。その区別のため。
+let g_flagIsBootProcessFinished = false; // 起動時に機器一覧を取得した時に処理が必要。その区別のため。
+let g_flagIsApikeyEmpty = true; // 起動時に apikey が設定されていないかを確認
 
 let bind_data = {
   // Software version
-  version: "v0.2.0",
+  version: "v0.3.0",
 
   // data in config.json
   scheme: "",
@@ -337,6 +338,23 @@ const template_setting = {
       };
       console.log("saveSettingsButtonIsClicked", configData);
       saveConfig(configData);
+      // 起動時処理が完了していなくて、apiKeyが設定されている場合、機器一覧取得を行う。
+      if (!g_flagIsBootProcessFinished && this.apiKey) {
+        const requestMethod = "GET";
+        const message = accessElServer(
+          this.scheme,
+          this.elApiServer,
+          this.apiKey,
+          requestMethod,
+          this.prefix,
+          "/devices",
+          "",
+          "",
+          "",
+          "",
+          ""
+        );  
+      }
     },
     // デバイス削除ボタン(Trash can)がクリックされたときの処理
     deleteDeviceButtonIsClicked: function (value) {
@@ -383,23 +401,25 @@ const template_setting = {
       );
     },
   },
-  // Setting pageを表示する時に呼ばれるfunction
+  // インスタンスが生成された時（Setting pageを表示する時）に呼ばれるfunction
   // EL WebAPI serverにアクセス（GET /devices)して、デバイス情報を取得
   created: function () {
     console.log("Setting page is created");
-    accessElServer(
-      this.scheme,
-      this.elApiServer,
-      this.apiKey,
-      "GET",
-      this.prefix,
-      "/devices",
-      "",
-      "",
-      "",
-      "",
-      ""
-    );
+    if (!g_flagIsApikeyEmpty) {
+      accessElServer(
+        this.scheme,
+        this.elApiServer,
+        this.apiKey,
+        "GET",
+        this.prefix,
+        "/devices",
+        "",
+        "",
+        "",
+        "",
+        ""
+      );  
+    }
   },
 };
 
@@ -1393,34 +1413,37 @@ ws.onopen = function (event) {
   console.log(" WebSocket: connected");
 };
 
-// server側のファイルconfig.jsonのデータをリクエストする。その値をvmに設定する。
-// apiKeyがblankの場合、ダイアログを表示してapiKeyを入力させる。config.json に書き込む。
+// 起動時に、server側のファイルconfig.jsonのデータをリクエストする。その値をvmに設定する。
+// config.json の中身の scheme, elApiServer, prefix が設定されていない場合は default 値を設定し、condif.json に書き込む
+// apiKeyがblankの場合、Alert ダイアログを表示する。
+//  (electron では window.prompt がサポートされていないので、window.alert)
 // XHR 非同期処理
 function reqListener() {
   let update_flag = false;
   console.log("config.json!:", this.responseText);
   const config = JSON.parse(this.responseText);
-  if (config.scheme === undefined || config.scheme == "") {
+  if (config.scheme === undefined || config.apiKey == "" || config.apiKey == null) {
     console.log("config.scheme is undefined or empty");
     config.scheme = "https";
     update_flag = true;
   }
-  if (config.elApiServer === undefined || config.elApiServer == "") {
+  if (config.elApiServer === undefined || config.apiKey == "" || config.apiKey == null) {
     console.log("config.elApiServer is undefined or empty");
     config.elApiServer = "webapiechonet.com";
     update_flag = true;
   }
-  if (config.prefix === undefined || config.prefix == "") {
+  if (config.prefix === undefined || config.apiKey == "" || config.apiKey == null) {
     console.log("config.prefix is undefined or empty");
     config.prefix = "/elapi/v1";
     update_flag = true;
   }
-  if (config.apiKey === undefined || config.apiKey == "") {
-    // window.alert("Api Keyが設定されていません。設定画面で入力してください。");
-    config.apiKey = window.prompt(
-      "Api Key が未設定です。Api Key を入力してください。"
-    );
-    update_flag = true;
+  if (config.apiKey === undefined || config.apiKey == "" || config.apiKey == null) {
+    g_flagIsApikeyEmpty = true;
+    console.log("config.apiKey is undefined or empty");
+    config.apiKey = "";
+    window.alert("Api Key が設定されていません。設定画面で入力してください。");
+  } else {
+    g_flagIsApikeyEmpty = false;
   }
 
   vm.scheme = config.scheme;
@@ -1435,33 +1458,29 @@ function reqListener() {
       prefix: config.prefix,
       apiKey: config.apiKey,
     };
-    console.log("apikey is set!", configData);
+    console.log("Update config.json!", configData);
     saveConfig(configData);
   }
 
   // config.json取得後の起動処理
-  console.log("config.json取得後の起動処理");
-
-  // - 機器一覧を ELWebAPI Server から取得する
-  g_flagIsBootProcess = true; // これを true にすることで、websocket受信時に起動時処理を行う
-  const requestMethod = "GET";
-  const message = accessElServer(
-    config.scheme,
-    config.elApiServer,
-    config.apiKey,
-    requestMethod,
-    config.prefix,
-    "/devices",
-    "",
-    "",
-    "",
-    "",
-    ""
-  );
-  // - ELWebAPI Server からのresponseは非同期処理、websocketで通知される。
-  // - したがって以下の処理はwebsocketの受信処理で記述する。
-  //   - 取得した機器一覧の中に、エアコン・照明・電気温水器があるかどうかを確認する
-  //   - なければ、APIで Server に作成依頼をする
+  // apikey が設定設定されていたら 機器一覧を ELWebAPI Server から取得する
+  // ELWebAPI Server からのresponseは非同期処理、websocketで通知される。
+  if (!g_flagIsApikeyEmpty) {
+    const requestMethod = "GET";
+    const message = accessElServer(
+      config.scheme,
+      config.elApiServer,
+      config.apiKey,
+      requestMethod,
+      config.prefix,
+      "/devices",
+      "",
+      "",
+      "",
+      "",
+      ""
+    );  
+  }
 }
 
 const request = new XMLHttpRequest();
@@ -1480,9 +1499,10 @@ ws.onmessage = function (event) {
   console.log(" status code:", obj.statusCode);
   console.log(" response:", obj.response);
 
-  // 起動時処理 or 通常時処理
-  if (g_flagIsBootProcess) {
-    // 起動時処理
+  // 起動時処理
+  //   - 機器一覧の中に、エアコン・照明・電気温水器があるかどうかを確認する
+  //   - なければ、APIで Server に作成依頼をする
+  if (!g_flagIsBootProcessFinished) {
     console.log("起動時処理 in websocket 受信");
     let generalLightingIsFound = false;
     let homeAirConditionerIsFound = false;
@@ -1533,9 +1553,9 @@ ws.onmessage = function (event) {
         "electricWaterHeater"
       );
     }
+    g_flagIsBootProcessFinished = true;
   } else {
     // 通常時処理
-
     // SEND buttonによるrequestのresponseなら、Request & Response 及び LOG を表示
     if (g_flagSendButtonIsClicked) {
       // Request & Responseのupdate
@@ -1818,6 +1838,5 @@ ws.onmessage = function (event) {
       }
     }
   }
-  g_flagIsBootProcess = false;
   g_flagSendButtonIsClicked = false;
 };

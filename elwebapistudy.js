@@ -33,16 +33,6 @@ fs.readFile(configPath, 'utf8', (err, data) => {
   console.log("\nconfig.json:", config);
 });
 
-// // create a folder "log" to save log files, if it doesn't exist
-// fs.readdir('.', function(err, files){
-//   if (err) throw err;
-//   if (files.includes('log') == false) {
-//     fs.mkdir('log', (err) => {
-//       if (err) console.log("Error: mkdir log");
-//     });
-//   }
-// });
-
 // web serverの起動
 server.listen(port, function(){
   console.log("\n**************************************************************");
@@ -184,26 +174,3 @@ function sendRequest(hostname, path, method, headers, body) {
   }
   req.end();
 }
-
-// logの保存。file nameはtimestampを利用する
-// function saveLog(data) {  // data:string
-//   const date = new Date();
-//   let year = date.getFullYear();
-//   let month = (date.getMonth()+1).toString();
-//   let day = date.getDate().toString();
-//   let hour = date.getHours().toString();
-//   let minute = date.getMinutes().toString();
-//   let second = date.getSeconds().toString();
-//   month = (month.length == 1) ? ("0" + month) : month;
-//   day = (day.length == 1) ? ("0" + day) : day;
-//   hour = (hour.length == 1) ? ("0" + hour) : hour;
-//   minute = (minute.length == 1) ? ("0" + minute) : minute;
-//   second = (second.length == 1) ? ("0" + second) : second;
-//   const filename = "log_" + year + month + day + hour + minute + second  + ".txt";
-  
-//   const buffer = Buffer.from(data);
-//   fs.writeFile("log/"+filename, buffer, (err) => {
-//     if (err) console.log("Error: Can not save a log file.");
-//     console.log('\nA log file is saved!');
-//   });
-// }

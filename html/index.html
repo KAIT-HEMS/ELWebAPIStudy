@@ -182,13 +182,13 @@
         <div class="d-inline-block float-right mr-3">
           <!-- ホームボタン -->
           <router-link to="/home">
-            <div class="btn" title="Back to the home">
+            <div class="btn" title="Home">
               <span class="fas fa-home" style="color:#FFFFFF;"></span>
             </div>
           </router-link>
           <!-- 設定ボタン -->
           <router-link to="/setting">
-            <div class="btn" title="Setting">
+            <div class="btn" title="設定">
               <span class="fas fa-cog" style="color:#FFFFFF;"></span>
             </div>
           </router-link>
@@ -432,11 +432,11 @@
                   <div class="input-group-text">Scheme</div>
                 </div>
                 <div class="form-check form-check-inline">
-                  <input class="form-check-input ml-3" type="radio" id="https" value="https" v-model="scheme">
+                  <input class="form-check-input ml-3" type="radio" disabled id="https" value="https" v-model="scheme">
                   <label class="form-check-label" for="https">https</label>
                 </div>
                 <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" id="http" value="http" v-model="scheme">
+                  <input class="form-check-input" type="radio" disabled id="http" value="http" v-model="scheme">
                   <label class="form-check-label" for="http">http</label>
                 </div>
               </div>
@@ -446,7 +446,7 @@
                 <div class="input-group-prepend">
                   <div class="input-group-text">Server name</div>
                 </div>
-                <input type="text" class="form-control" id="inputElApiServer" v-model="elApiServer">
+                <input type="text" readonly class="form-control" id="inputElApiServer" v-model="elApiServer">
               </div>
             </div>
             <div class="form-row">
@@ -454,7 +454,7 @@
                 <div class="input-group-prepend">
                   <div class="input-group-text">Prefix</div>
                 </div>
-                <input type="text" class="form-control" id="inputPrefix" v-model="prefix">
+                <input type="text" readonly class="form-control" id="inputPrefix" v-model="prefix">
               </div>
             </div>
             <div class="form-row">
