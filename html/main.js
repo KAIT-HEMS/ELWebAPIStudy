@@ -1,5 +1,5 @@
 // main.js for elwebapistudy(client side)
-// 2021.02.19
+// 2021.03.02
 // Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium
 // Released under the MIT License.
 //
@@ -25,7 +25,7 @@ let g_flagIsApikeyEmpty = true; // 起動時に apikey が設定されていな�
 
 let bind_data = {
   // Software version
-  version: "v0.3.0",
+  version: "v0.4.0",
 
   // data in config.json
   scheme: "",
@@ -37,6 +37,7 @@ let bind_data = {
   lighting: {},
   aircon: {},
   waterHeater: {},
+  smartMeter: {},
   propertyInfoArray: [], // [{propertyName:string, description:string, writable:boolean}, {}]
 
   airconOperationStatus: "",
@@ -48,11 +49,15 @@ let bind_data = {
   waterHeaterOperationStatus: "",
   waterHeaterTankOperationMode: "",
   waterHeaterTargetWaterHeatingTemperature: "",
+  smartMeterNormalDirectionCumulativeElectricEnergy: "",
+  smartMeterInstantaneousElectricPower: "",
+  smartMeterNormalDirectionCumulativeElectricEnergyLog1: "",
 
   deviceSelected: "",
   graphicLighting: "off",
   graphicAircon: "off",
   graphicWaterHeater: "off",
+  graphicSmartMeter: "off",
   device_id: "",
   device_deviceType: "",
   device_version: "",
@@ -188,6 +193,7 @@ const template_home = {
       this.graphicLighting = "off";
       this.graphicAircon = "off";
       this.graphicWaterHeater = "off";
+      this.graphicSmartMeter = "off";
       this.idInfoList = [];
       this.device_id = "";
       this.device_deviceType = "";
@@ -208,6 +214,9 @@ const template_home = {
       if (this.graphicWaterHeater !== "off") {
         this.graphicWaterHeater = "notSelected";
       }
+      if (this.graphicSmartMeter !== "off") {
+        this.graphicSmartMeter = "notSelected";
+      }
       this.device_id = this.lighting.id;
       this.device_deviceType = this.lighting.deviceType;
       this.device_version = this.lighting.version;
@@ -223,6 +232,9 @@ const template_home = {
       this.graphicAircon = "selected";
       if (this.graphicWaterHeater !== "off") {
         this.graphicWaterHeater = "notSelected";
+      }
+      if (this.graphicSmartMeter !== "off") {
+        this.graphicSmartMeter = "notSelected";
       }
       this.device_id = this.aircon.id;
       this.device_deviceType = this.aircon.deviceType;
@@ -240,11 +252,33 @@ const template_home = {
         this.graphicAircon = "notSelected";
       }
       this.graphicWaterHeater = "selected";
+      if (this.graphicSmartMeter !== "off") {
+        this.graphicSmartMeter = "notSelected";
+      }
       this.device_id = this.waterHeater.id;
       this.device_deviceType = this.waterHeater.deviceType;
       this.device_version = this.waterHeater.version;
       this.device_manufacturer = this.waterHeater.manufacturer;
       this.propertyInfoArray = this.waterHeater.propertyInfoArray;
+    },
+    smartMeterIsClicked: function () {
+      console.log("スマートメータが選択されました。");
+      this.deviceSelected = "smartMeter";
+      if (this.graphicLighting !== "off") {
+        this.graphicLighting = "notSelected";
+      }
+      if (this.graphicAircon !== "off") {
+        this.graphicAircon = "notSelected";
+      }
+      if (this.graphicWaterHeater !== "off") {
+        this.graphicWaterHeater = "notSelected";
+      }
+      this.graphicSmartMeter = "selected";
+      this.device_id = this.smartMeter.id;
+      this.device_deviceType = this.smartMeter.deviceType;
+      this.device_version = this.smartMeter.version;
+      this.device_manufacturer = this.smartMeter.manufacturer;
+      this.propertyInfoArray = this.smartMeter.propertyInfoArray;
     },
     getDeviceDescriptionButtonIsClicked: function () {
       console.log("機器情報取得 ボタンがクリックされました。");
@@ -301,15 +335,6 @@ const template_home = {
         );
         this.requestBody = "";
       }
-    },
-    setAirconOperationStatusOnButtonIsClicked: function () {
-      console.log("setAirconOperationStatusOn ボタンがクリックされました。");
-    },
-    setAirconOperationStatusOffButtonIsClicked: function () {
-      console.log("setAirconOperationStatusOn ボタンがクリックされました。");
-    },
-    getAirconOperationStatusButtonIsClicked: function () {
-      console.log("getAirconOperationStatus ボタンがクリックされました。");
     },
     clearReqAndResButtonIsClicked: function () {
       console.log("Clear-ReqAndRes ボタンがクリックされました。");
@@ -570,32 +595,6 @@ function saveConfig(configData) {
   request.setRequestHeader("Content-type", "application/json");
   request.send(JSON.stringify(message));
 }
-
-// function updateResourceName(requestMethod, idSelected, resourceTypeSelected) {
-//   console.log(
-//     "updateResourceName ",
-//     requestMethod,
-//     idSelected,
-//     resourceTypeSelected
-//   );
-//   let resourceNameList = [];
-//   if (resourceTypeSelected !== "") {
-//     const thingInfo = g_thingInfo[idSelected];
-//     if (thingInfo !== undefined) {
-//       if (resourceTypeSelected == "/properties" && requestMethod == "GET") {
-//         resourceNameList = thingInfo.propertyList;
-//       }
-//       if (resourceTypeSelected == "/properties" && requestMethod == "PUT") {
-//         resourceNameList = thingInfo.propertyListWritable;
-//       }
-//       if (resourceTypeSelected == "/actions" && requestMethod == "POST") {
-//         resourceNameList = thingInfo.actionList;
-//       }
-//       vm.resourceNameList = resourceNameList;
-//       // vm.resourceNameSelected = (resourceNameList[1]) ? resourceNameList[1] : "";
-//     }
-//   }
-// }
 
 // Home画面Left window - Property section - 照明
 Vue.component("ctrl-lighting", {
@@ -1399,6 +1398,168 @@ Vue.component("ctrl-waterHeater", {
   `,
 });
 
+// Home画面Left window - Property section - 低圧スマートメータ
+Vue.component("ctrl-smartMeter", {
+  data: function () {
+    return {
+      dayValue: 30,
+    };
+  },
+  computed: {
+    normalDirectionCumulativeElectricEnergy: {
+      get() {
+        return vm.smartMeterNormalDirectionCumulativeElectricEnergy;
+      }
+    },
+    instantaneousElectricPower: {
+      get() {
+        return vm.smartMeterInstantaneousElectricPower;
+      }
+    },
+    normalDirectionCumulativeElectricEnergyLog1: {
+      get() {
+        return vm.smartMeterNormalDirectionCumulativeElectricEnergyLog1;
+      }
+    },
+    queryDayValue: {
+      get() {
+        return this.dayValue;
+      },
+      set(value) {
+        this.dayValue = value;
+      },
+    },
+  },
+  methods: {
+    getNormalDirectionCumulativeElectricEnergy: function () {
+      console.log("getNormalDirectionCumulativeElectricEnergy がクリックされました。");
+      const requestMethod = "GET";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(
+          vm.scheme,
+          vm.elApiServer,
+          vm.apiKey,
+          requestMethod,
+          vm.prefix,
+          "/devices",
+          "/" + vm.device_id,
+          "/properties",
+          "/normalDirectionCumulativeElectricEnergy",
+          "",
+          ""
+        );
+        // REQUEST表示エリアのデータ設定
+        vm.request = makeRequest(
+          message.method,
+          vm.scheme,
+          message.hostname,
+          message.path
+        );
+        vm.requestBody = "";
+      }
+    },
+    getInstantaneousElectricPower: function () {
+      console.log("getinstantaneousElectricPower がクリックされました。");
+      const requestMethod = "GET";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(
+          vm.scheme,
+          vm.elApiServer,
+          vm.apiKey,
+          requestMethod,
+          vm.prefix,
+          "/devices",
+          "/" + vm.device_id,
+          "/properties",
+          "/instantaneousElectricPower",
+          "",
+          ""
+        );
+        // REQUEST表示エリアのデータ設定
+        vm.request = makeRequest(
+          message.method,
+          vm.scheme,
+          message.hostname,
+          message.path
+        );
+        vm.requestBody = "";
+      }
+    },
+    getNormalDirectionCumulativeElectricEnergyLog1: function () {
+      console.log("getNormalDirectionCumulativeElectricEnergyLog1 がクリックされました。");
+      // console.log("query", this.queryDayValue);
+      const requestMethod = "GET";
+      if (vm.device_id !== "") {
+        g_flagSendButtonIsClicked = true;
+        const message = accessElServer(
+          vm.scheme,
+          vm.elApiServer,
+          vm.apiKey,
+          requestMethod,
+          vm.prefix,
+          "/devices",
+          "/" + vm.device_id,
+          "/properties",
+          "/normalDirectionCumulativeElectricEnergyLog1",
+          "day=" + this.queryDayValue,
+          ""
+        );
+        // REQUEST表示エリアのデータ設定
+        vm.request = makeRequest(
+          message.method,
+          vm.scheme,
+          message.hostname,
+          message.path
+        );
+        vm.requestBody = "";
+      }
+    },
+  },
+  template: `
+  <div>
+    <table class="table table-sm m-0">
+      <thead>
+        <th>プロパティ名</th>
+        <th>query 値設定</th>
+        <th>値取得</th>
+      </thead>
+      <tr>
+        <td>積算電力量計測値（正方向計測値）</td>
+        <td></td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getNormalDirectionCumulativeElectricEnergy">Get value</button>
+          {{normalDirectionCumulativeElectricEnergy}}
+        </td>
+      </tr>
+      <tr>
+        <td>瞬時電力計測値</td>
+        <td></td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getInstantaneousElectricPower">Get value</button>
+          {{instantaneousElectricPower}}
+        </td>
+      </tr>
+      <tr>
+        <td>積算電力量計測値履歴1（正方向計測値）</td>
+        <td>
+          <div class="row">
+            <input v-model="queryDayValue" type="range" value="0" min="0" max="99" >
+            <div class="slider-value" >{{queryDayValue}}日</div>
+          </div>
+        </td>
+        <td>
+          <button type="button" class="btn btn-secondary btn-sm" title="Get value" v-on:click="getNormalDirectionCumulativeElectricEnergyLog1">Get value</button>
+          {{normalDirectionCumulativeElectricEnergyLog1.day}}
+        </td>
+      </tr>
+    </table>
+  </div>
+  `,
+});
+
+
 // Vueのインスタンス作成
 let vm = new Vue({
   el: "#app",
@@ -1507,6 +1668,7 @@ ws.onmessage = function (event) {
     let generalLightingIsFound = false;
     let homeAirConditionerIsFound = false;
     let electricWaterHeaterIsFound = false;
+    let lvSmartElectricEnergyMeterIsFound = false;
 
     for (const device of obj.response.devices) {
       if (device.deviceType == "generalLighting") {
@@ -1517,6 +1679,9 @@ ws.onmessage = function (event) {
       }
       if (device.deviceType == "electricWaterHeater") {
         electricWaterHeaterIsFound = true;
+      }
+      if (device.deviceType == "lvSmartElectricEnergyMeter") {
+        lvSmartElectricEnergyMeterIsFound = true;
       }
     }
 
@@ -1551,6 +1716,17 @@ ws.onmessage = function (event) {
         vm.apiKey,
         vm.prefix,
         "electricWaterHeater"
+      );
+    }
+    if (!lvSmartElectricEnergyMeterIsFound) {
+      // Serverに低圧スマートメータが存在しない場合、APIで lvSmartElectricEnergyMeter を作成
+      console.log("Create lvSmartElectricEnergyMeter on the server");
+      accessElServerAddDevice(
+        vm.scheme,
+        vm.elApiServer,
+        vm.apiKey,
+        vm.prefix,
+        "lvSmartElectricEnergyMeter"
       );
     }
     g_flagIsBootProcessFinished = true;
@@ -1642,6 +1818,14 @@ ws.onmessage = function (event) {
               manufacturer: thing.manufacturer.descriptions.ja,
             };
             vm.graphicWaterHeater = "notSelected";
+          } else if (deviceType == "lvSmartElectricEnergyMeter") {
+            vm.smartMeter = {
+              id: thing.id,
+              deviceType: deviceType,
+              version: thing.protocol.version,
+              manufacturer: thing.manufacturer.descriptions.ja,
+            };
+            vm.graphicSmartMeter = "notSelected";
           }
         }
       }
@@ -1729,24 +1913,6 @@ ws.onmessage = function (event) {
       g_thingInfo[thingId] = thingInfo;
       console.log("g_thingInfo", g_thingInfo);
 
-      // // resourceTypeListを新規に作成する
-      // let resourceTypeList = [""];
-      // if (obj.response.properties !== undefined) {
-      //   resourceTypeList.push("/properties");
-      // }
-      // if (obj.response.actions !== undefined) {
-      //   resourceTypeList.push("/actions");
-      // }
-      // if (obj.response.events !== undefined) {
-      //   resourceTypeList.push("/events");
-      // }
-      // console.log("resourceTypeListの更新:", resourceTypeList);
-      // vm.resourceTypeList = resourceTypeList;
-
-      // 入力フィールドResouce TypeとResource Nameの表示項目の更新
-      // updateResourceName("GET", thingId, "/properties");
-      // vm.resourceTypeSelected = (resourceTypeList[1]) ? resourceTypeList[1] : "";
-
       // 入力フィールドidの下のdeviceTypeの更新
       vm.deviceType = obj.response.deviceType;
 
@@ -1773,6 +1939,8 @@ ws.onmessage = function (event) {
         vm.lighting.propertyInfoArray = vm.propertyInfoArray;
       } else if (vm.deviceType == "electricWaterHeater") {
         vm.waterHeater.propertyInfoArray = vm.propertyInfoArray;
+      } else if (vm.deviceType == "lvSmartElectricEnergyMeter") {
+        vm.smartMeter.propertyInfoArray = vm.propertyInfoArray;
       }
     }
 
@@ -1833,6 +2001,23 @@ ws.onmessage = function (event) {
             );
             vm.waterHeaterTargetWaterHeatingTemperature =
               obj.response.targetWaterHeatingTemperature;
+          }
+        } else if (vm.deviceType == "lvSmartElectricEnergyMeter") {
+          console.log("response is property value for smartMeter");
+          if (obj.response.normalDirectionCumulativeElectricEnergy !== undefined) {
+            vm.smartMeterNormalDirectionCumulativeElectricEnergy = obj.response.normalDirectionCumulativeElectricEnergy;
+          }
+          if (obj.response.instantaneousElectricPower !== undefined) {
+            console.log("instantaneousElectricPower is", obj.response.instantaneousElectricPower);
+            vm.smartMeterInstantaneousElectricPower = obj.response.instantaneousElectricPower;
+          }
+          if (obj.response.normalDirectionCumulativeElectricEnergyLog1 !== undefined) {
+            console.log(
+              "normalDirectionCumulativeElectricEnergyLog1 is",
+              obj.response.normalDirectionCumulativeElectricEnergyLog1
+            );
+            vm.smartMeterNormalDirectionCumulativeElectricEnergyLog1 =
+              obj.response.normalDirectionCumulativeElectricEnergyLog1;
           }
         }
       }

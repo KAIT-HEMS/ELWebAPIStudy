@@ -1,5 +1,5 @@
 // main.js for ELWebAPIStudy
-// 2021.02.17
+// 2021.02.26
 // Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium
 // Released under the MIT License.
 
@@ -20,43 +20,9 @@ const fs = require("fs");
 
 // electronのmain window
 let mainWindow = null;
-
-//////////////////////////////////////////////////////////////////////
-// Communication for Electron's Renderer process
-//////////////////////////////////////////////////////////////////////
-// IPC 受信から非同期で実行
-// ipcMain.on("to-main", function (event, arg) {
-//   // メッセージが来たとき
-//   console.log("--- received from Renderer.");
-//   console.log(arg);
-// });
-
-//////////////////////////////////////////////////////////////////////
 const mainFunction = require("./elwebapistudy.js");
 mainFunction.funcIndex();
 
-//////////////////////////////////////////////////////////////////////
-// Communication for Electron's Renderer process
-//////////////////////////////////////////////////////////////////////
-// IPC 受信から非同期で実行
-// ipcMain.on("to-main", function (event, arg) {
-//   // メッセージが来たとき
-//   console.log("--- received from Renderer.");
-//   console.log(arg);
-
-//   let c = JSON.parse(arg);
-
-//   switch (c.cmd) {
-//     case "already": // 準備出来たらRenderer更新して，INF
-//       break;
-
-//     default:
-//       console.log("## get error cmd : " + arg);
-//       break;
-//   }
-// });
-
-//////////////////////////////////////////////////////////////////////
 // foreground
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -81,7 +47,6 @@ function createWindow() {
 app.on("ready", createWindow);
 
 // アプリケーションがアクティブになった時の処理
-// （Macだと、Dockがクリックされた時）
 app.on("activate", () => {
   // メインウィンドウが消えている場合は再度メインウィンドウを作成する
   if (mainWindow === null) {
@@ -90,7 +55,6 @@ app.on("activate", () => {
 });
 
 app.on("window-all-closed", () => {
-  // macだろうとプロセスはkillしちゃう
   app.quit();
 });
 
@@ -102,8 +66,7 @@ const menuItems = [
       {
         label: "Preferences...",
         accelerator: "Command+,",
-        click: function () {
-        },
+        click: function () {},
       },
       {
         label: "Quit",
@@ -139,16 +102,6 @@ const menuItems = [
         click(item, focusedWindow) {
           if (focusedWindow) focusedWindow.reload();
         },
-        // },
-        // {
-        // label: 'Toggle Full Screen',
-        // accelerator: 'Ctrl+Command+F',
-        // click: function() { mainWindow.setFullScreen(!mainWindow.isFullScreen()); }
-        // },
-        // {
-        // label: 'Toggle Developer Tools',
-        // accelerator: 'Alt+Command+I',
-        // click: function() { mainWindow.toggleDevTools(); }
       },
     ],
   },

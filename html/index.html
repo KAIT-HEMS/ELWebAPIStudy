@@ -1,5 +1,5 @@
 <!-- index.html for elwebapistudy-->
-<!-- 2021.02.17 -->
+<!-- 2021.03.02 -->
 <!-- Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium -->
 <!-- Released under the MIT License. -->
 <!doctype html>
@@ -26,25 +26,33 @@
       padding: 0;
     }
 
-    .home-left {
-      /* padding-left: 0; */
-      padding-right: 0;
-      margin-bottom: 1em;
+    #home-left {
+      padding: 0;
     }
 
-    .home-right {
-      padding-left: 0;
-      padding-right: 0;
-      margin-bottom: 1em;
+    #home-left-card-header{
+      background-color: #ffe9a2;
+    }
+
+    #home-right {
+      padding: 0;
+    }
+
+    #home-right .card-header{
+      background-color: #ffe9a2;
     }
 
     .card-header {
       padding: 0.1em 1em;
-      /* padding: 0 1em; */
     }
 
     .card-header h5 {
-      padding: 0 1em;
+      margin: 0;
+      padding: 0.2em 0 0 1em;
+    }
+
+    .card-body {
+      padding: 0;
     }
 
     .request-response-body {
@@ -61,10 +69,6 @@
       font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
       font-size: 90%;
       padding: 0.2em 1em;
-    }
-
-    #card-property-body {
-      height: 10em;
     }
 
     #deviceDescription-wrapper {
@@ -93,6 +97,18 @@
 
     #deviceDescription-list-header {
       font-weight: bold;
+    }
+
+    #property-card-body {
+      height: 10em;
+    }
+
+    #operation-guide {
+    }
+    #operation-guide-title {
+      background-color: #ffe9a2;
+    }
+    #operation-guide-content {
     }
 
     #setting-devices-body {
@@ -126,6 +142,10 @@
 
     #setting-devices-list li span.col3 {
       width: 4em;
+    }
+
+    #help {
+      padding: 1em;
     }
 
     /* slider value */
@@ -163,7 +183,7 @@
 <body>
   <div id="app">
     <header>
-      <div class="navbar navbar-expand-md navbar-dark fixed-top bg-dark d-block">
+      <div class="navbar navbar-expand-md navbar-dark fixed-top d-block" style="background-color: #5c80c5;">
         <!-- App name -->
         <div class="d-inline-block ml-3 mb-0">
           <router-link to="/home">
@@ -210,11 +230,11 @@
   <!-- Template for Home page-->
   <script type="text/x-template" id="tmpl-page-home">
     <div>
-      <div class="row">
+      <div class="row p-0 m-0">
 
         <!-- Card: Left column "Operation" -->
-        <div class="card col-7 home-left">
-          <div class="card-header">
+        <div class="card col-7" id="home-left">
+          <div class="card-header" id="home-left-card-header">
             <div class="row">
               <h5>Operation</h5>
               <div class="col"></div>
@@ -227,7 +247,8 @@
             </div>
           </div>
 
-          <div class="card-body p-2">
+          <!-- <div class="card-body p-2"> -->
+          <div class="card-body">
 
             <!-- Card: Device -->
             <div class="card">
@@ -241,7 +262,8 @@
                       type="button" 
                       class="btn btn-secondary btn-sm" 
                       title="GET /devices" 
-                      v-on:click="getDeviceInfoButtonIsClicked">
+                      v-on:click="getDeviceInfoButtonIsClicked"
+                      style="background-color: #5c80c5;">
                       機器一覧取得
                     </button>
                   </div>
@@ -286,6 +308,17 @@
                       <img src="./graphic/waterHeater1.png" v-if="graphicWaterHeater == 'selected'">
                       <img src="./graphic/waterHeater2.png" v-if="graphicWaterHeater == 'notSelected'">
                     </button>
+
+                    <button 
+                      type="button" 
+                      class="btn btn-light py-0 my-0" 
+                      title="低圧スマートメータ" 
+                      v-on:click="smartMeterIsClicked"
+                      v-if="graphicSmartMeter !== 'off'"
+                    >
+                      <img src="./graphic/smartMeter1.png" v-if="graphicSmartMeter == 'selected'">
+                      <img src="./graphic/smartMeter2.png" v-if="graphicSmartMeter == 'notSelected'">
+                    </button>
                   </div>
                 </div>
 
@@ -301,7 +334,7 @@
             </div>
 
             <!-- Card: Device description -->
-            <div class="card mt-1">
+            <div class="card">
 
               <div class="card-header">
                 <div class="row">
@@ -313,7 +346,8 @@
                       type="button" 
                       class="btn btn-secondary btn-sm" 
                       title="GET /devices/<id>" 
-                      v-on:click="getDeviceDescriptionButtonIsClicked" >
+                      v-on:click="getDeviceDescriptionButtonIsClicked"
+                      style="background-color: #5c80c5;">
                       機器情報取得
                     </button>
                   </div>
@@ -339,8 +373,8 @@
             </div>
 
             <!-- Card: Property -->
-            <div class="card mt-1">
-              <div class="card-header">
+            <div class="card">
+                <div class="card-header">
                 <div class="row">
                   <h5>Property</h5>
                   <div class="col"></div>
@@ -350,37 +384,39 @@
                       type="button" 
                       class="btn btn-secondary btn-sm" 
                       title="Get /devices/<id>/properties" 
-                      v-on:click="getAllPropertyValuesButtonIsClicked" >
+                      v-on:click="getAllPropertyValuesButtonIsClicked"
+                      style="background-color: #5c80c5;">
                       全プロパティ値取得
                     </button>
                   </div>
                 </div>
               </div>
 
-              <div class="card-body py-0" id="card-property-body">
+              <div class="card-body py-0" id="property-card-body">
                 <component v-bind:is="selectedDeviceComponent"></component>
               </div>
 
             </div>
 
             <!-- Operation guide -->
-            <div class="row mx-0">
-              <div class="col-auto p mt-1 border">操作ガイド</div>
-              <div class="col p mt-1 border">{{operationGuide}}</div>
+            <div class="row mx-0" id="operation-guide">
+              <!-- <div class="col-auto p mt-1 border" id="operation-guide-title">操作ガイド</div> -->
+              <div class="col-auto mt-1 border" id="operation-guide-title">操作ガイド</div>
+              <div class="col mt-1 border" id="operation-guide-content">{{operationGuide}}</div>
             </div>
-
 
           </div>
         </div>
 
         <!-- Card: Right Window -->
-        <div class="card col-5 home-right">
+        <div class="card col-5" id="home-right">
           <div class="card-header">
             <div class="row">
               <h5>Request & Response</h5>
               <div class="col"></div>
               <!-- Clear ボタン -->
-              <div class="col-auto mr-3">
+              <div class="col-auto">
+              <!-- <div class="col-auto mr-3"> -->
                 <button type="button" class="btn btn-secondary btn-sm" title="Clear" v-on:click="clearReqAndResButtonIsClicked">
                   Clear
                 </button>
@@ -517,27 +553,30 @@
         </div>
       </div>
 
-    </div>  
+    </div>
   </script>
 
   <!-- Template for Help page-->
   <script type="text/x-template" id="tmpl-page-help">
-    <div class="card">
+    <div class="card" id="help">
       <div class="card-body">
         <h5 class="card-title">ECHONET Lite WebAPI 学習用アプリについて</h5>
         <p class="card-text">
           ECHONET Lite WebAPI 学習用アプリは、エコーネットコンソーシアムが策定した
           <a href=https://echonet.jp/web_api/#guideline target="_blank" rel="noreferrer">ECHONET Lite WebAPI</a>
           の仕様を学習するためのアプリです。
-          リモコンライクなUIを操作すると、ECHONET Lite WebAPI を使ったリクエストをサーバーへ送信します。
-          サーバーへのリクエストとサーバーからのレスポンスを画面に表示します。
+          画面左側のリモコンライクなUIを操作すると、ECHONET Lite WebAPI を使用したリクエストをサーバーへ送信します。
+          画面右側には、サーバーへのリクエストとサーバーからのレスポンスを表示します。
         </p>
         <p>
-          機器リストの取得・機器情報の取得・動作設定と状態取得という一連の操作を行い、それぞれの操作に対応するリクエスト＆レスポンスを確認することで、ECHONET Lite WebAPIの仕組みを理解することができます。
-          このアプリは、家庭用エアコン（homeAirConditioner）、一般照明（generalLighting）、電気温水器(electricWaterHeater)に対応しています。
+          機器リストの取得・機器情報の取得・動作設定と状態取得という一連の操作を行い、
+          それぞれの操作に対応するリクエスト＆レスポンスを確認することで、
+          ECHONET Lite WebAPIの仕組みを理解することができます。<br>
+          このアプリは、家庭用エアコン (homeAirConditioner)　一般照明 (generalLighting)　
+          電気温水器 (electricWaterHeater)　低圧スマート電力量メータ (lvSmartElectricEnergyMeter) に対応しています。
         </p>
         <p>
-          エコーネットコンソーシアムが会員向けに運用している実験クラウドを ECHONET Lite WebAPI Server として利用します。
+          本アプリは、エコーネットコンソーシアムが会員向けに運用している実験クラウドを ECHONET Lite WebAPI Server として利用します。
           本アプリを利用するには、あらかじめエコーネットコンソーシアムの会員ページから実験クラウドの利用登録を行い、 APIkey を取得してください。
         </p>
       </div>

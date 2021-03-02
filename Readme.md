@@ -1,6 +1,6 @@
 # ECHONET Lite WebAPI 学習用アプリ：ELWebAPIStudy
 
-2021.02.17
+2021.03.02
 
 ## Abstract
 
@@ -8,9 +8,10 @@ ECHONET Lite WebAPI 学習用アプリは、エコーネットコンソーシア
 
 機器リストの取得・機器情報の取得・動作設定と状態取得という一連の操作を行い、それぞれの操作に対応するリクエスト＆レスポンスを確認することで、ECHONET Lite WebAPIの仕組みを理解することができます。
 
-このアプリは、家庭用エアコン（homeAirConditioner）、一般照明（generalLighting）、電気温水器(electricWaterHeater)に対応しています。
+このアプリは、家庭用エアコン (homeAirConditioner)　一般照明 (generalLighting)　電気温水器 (electricWaterHeater)　低圧スマート電力量メータ (lvSmartElectricEnergyMeter) に対応しています。
 
-エコーネットコンソーシアムが会員向けに運用している実験クラウドを ECHONET Lite WebAPI Server として利用します。本アプリを利用するには、あらかじめ[実験クラウドの利用登録](https://echonet.jp/echonet-lite-web-api-info/)を行いAPIkeyを取得してください。
+本アプリは、エコーネットコンソーシアムが会員向けに運用している実験クラウドを ECHONET Lite WebAPI Server として利用します。
+本アプリを利用するには、あらかじめ[実験クラウドの利用登録](https://echonet.jp/echonet-lite-web-api-info/)を行いAPIkeyを取得してください。
 
 ## Requirements
 
