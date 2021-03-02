@@ -36,7 +36,7 @@ function createWindow() {
   });
 
   // mainWindow.setMenu(null);
-  menuInitialize();
+  // menuInitialize();
   mainWindow.loadURL("http://localhost:3020/");
 
   mainWindow.on("closed", () => {
