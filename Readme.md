@@ -20,24 +20,8 @@ ECHONET Lite WebAPI 学習用アプリは、エコーネットコンソーシア
 
 ## Installation
 
-本アプリは、Package 版と Node.js 版があります。
-
-- Package 版は、Windows 用のインストーラを配布しています。
-- Node.js 版は、あらかじめ [Node.js](https://nodejs.org/ja/) をインストール必要があり、アプリの起動にはコマンドプロンプト(PC)やターミナル(Mac)での操作が必要です。
-
-### Windows 用 Package 版のインストールと実行
-
-1. インストーラを[ここ](http://sh-center.org/120620/downloads/elapistudy010Setup.exe)からダウンロードします
-2. ダウンロードしたインストーラを実行すると、アプリケーションは以下のようにインストールされます。
-
-    /ユーザー/\<user name>/AppData/Local/elapi_study/elapi-study.exe
-3. またアプリケーションが自動で起動します。
-4. インストールが正常に終了したら、インストーラは不要です。削除してください。
-
-### Node.js 版のインストール
-
 1. [Node.js](https://nodejs.org/ja/) のHPをアクセスし、推奨版をダウンロードしてインストールします。
-2. 本アプリの Node.js 版を[ここ](https://github.com/KAIT-HEMS/ELWebAPIStudy)からダウンロードし、解凍後適当なフォルダに配置します
+2. 本アプリを[ここ](https://github.com/KAIT-HEMS/ELWebAPIStudy)からダウンロードし、解凍後適当なフォルダに配置します
 3. コマンドプロンプト(PC) またはターミナル(Mac) を起動します
 4. コマンドプロンプトまたはターミナルで CD コマンドを使い、本アプリの Node.js 版を配置したフォルダに移動します。
 5. 次のコマンドを実行して、必要なモジュールをインストールします
@@ -67,3 +51,38 @@ ECHONET Lite WebAPI 学習用アプリは、エコーネットコンソーシア
 本アプリは内部動作のために Web Server を立ち上げ、3020 port を利用しています。本アプリを起動時に、他のアプリが既に 3020 port を利用している場合は、本アプリがエラーとなり終了します。
 
 Get device info ボタンをクリックしたのち、家庭用エアコン（homeAirConditioner）、一般照明（generalLighting）、電気温水器(electricWaterHeater)の３種類のデバイスのアイコンが表示されない場合は、 設定画面から機器を追加してください。
+
+## Packaging
+
+本アプリは electron-forge を利用して、Mac OS や Windows 用のアプリケーションを作成することができます。
+Packaging は、それぞれの OS 上で実行してください。また、あらかじめ npm start で動作することを確認してください。
+
+1. electron-forge をインストールする
+
+```
+  sudo npm i -g @electron-forge/cli
+```
+
+2. package.json を編集する (Windowsのみ)
+
+```
+  "icon": "./build/icons/mac/icon.icns" -> "icon": "./build/icons/win/icon.ico"
+```
+
+3. Pakaging を実行する
+
+```
+  npm run make
+```
+
+インストーラが以下のように作成されます。
+
+- Mac OS:
+./out/make/zip/darwin/x64/elapi-study-darwin-x64-0.4.0.zip
+
+- Windows:
+./out/make/squirrel.windows/x64/elapi-study-0.4.0.Setup.exe
+
+Windows 用の Setup.exe を実行すると、以下のようにアプリがインストールされます。
+
+  /ユーザー/\<user name>/AppData/Local/elapi_study/elapi-study.exe
