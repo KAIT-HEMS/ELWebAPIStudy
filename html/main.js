@@ -1,5 +1,5 @@
 // main.js for elwebapistudy(client side)
-// 2021.03.02
+// 2021.03.04
 // Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium
 // Released under the MIT License.
 //
@@ -25,7 +25,7 @@ let g_flagIsApikeyEmpty = true; // 起動時に apikey が設定されていな�
 
 let bind_data = {
   // Software version
-  version: "v0.4.0",
+  version: "v0.5.0",
 
   // data in config.json
   scheme: "",
@@ -1778,9 +1778,9 @@ ws.onmessage = function (event) {
       service = "histories";
     }
     if (service !== "") {
-      vm.idInfoList = [
-        { deviceType: "", id: "", version: "", manufacturer: "" },
-      ];
+      // vm.idInfoList = [
+      //   { deviceType: "", id: "", version: "", manufacturer: "" },
+      // ];
       if (obj.response[service] !== undefined) {
         for (let thing of obj.response[service]) {
           const deviceType =

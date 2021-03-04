@@ -8,7 +8,7 @@
  
 'use strict';
 
-const VERSION = "0.4.0 rev.20210302";
+const VERSION = "0.5.0 rev.20210304";
 const portNumber = 3020;
 const appname = 'ELWebAPIStudy';
 

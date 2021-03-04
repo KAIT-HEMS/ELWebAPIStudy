@@ -69,7 +69,7 @@ Packaging は、それぞれの OS 上で実行してください。また、あ
   "icon": "./build/icons/mac/icon.icns" -> "icon": "./build/icons/win/icon.ico"
 ```
 
-3. Pakaging を実行する
+3. Packaging を実行する
 
 ```
   npm run make

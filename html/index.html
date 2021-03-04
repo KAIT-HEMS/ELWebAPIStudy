@@ -1,5 +1,5 @@
 <!-- index.html for elwebapistudy-->
-<!-- 2021.03.02 -->
+<!-- 2021.03.04 -->
 <!-- Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium -->
 <!-- Released under the MIT License. -->
 <!doctype html>
@@ -28,6 +28,7 @@
 
     #home-left {
       padding: 0;
+      border: 1px solid #aaa;
     }
 
     #home-left-card-header{
@@ -36,6 +37,7 @@
 
     #home-right {
       padding: 0;
+      border: 1px solid #aaa;
     }
 
     #home-right .card-header{
@@ -88,14 +90,18 @@
     }
 
     #deviceDescription-list li span.col1 {
-      width: 15em;
+      width: 58%;
     }
 
     #deviceDescription-list li span.col2 {
-      width: 15em;
+      width: 31%;
     }
 
-    #deviceDescription-list-header {
+    #deviceDescription-list li span.col3 {
+      width: 11%;
+    }
+
+    .list-header {
       font-weight: bold;
     }
 
@@ -117,7 +123,7 @@
     }
 
     #setting-devices-list-wrapper {
-      height: 30em;
+      height: 22em;
       overflow-y: scroll;
     }
 
@@ -355,20 +361,23 @@
               </div>
 
               <div class="card-body py-0">
-                <div id="deviceDescription-wrapper">
+                <!-- <div id="deviceDescription-wrapper"> -->
                   <ul class="list-group" id="deviceDescription-list">
-                    <li class="list-group-item d-flex align-items-start" id="deviceDescription-list-header">
+                    <li class="list-group-item d-flex align-items-start list-header">
                       <span class="col1">property name</span>
                       <span class="col2">description</span>
                       <span class="col3">writable</span>
                     </li>
-                    <li v-for="propertyInfo in propertyInfoArray" class="list-group-item d-flex align-items-start">
-                      <span class="col1">{{ propertyInfo.propertyName }}</span>
-                      <span class="col2">{{ propertyInfo.description }}</span>
-                      <span class="col3">{{ propertyInfo.writable }}</span>
-                    </li>
+
+                    <div id="deviceDescription-wrapper">
+                      <li v-for="propertyInfo in propertyInfoArray" class="list-group-item d-flex align-items-start">
+                        <span class="col1">{{ propertyInfo.propertyName }}</span>
+                        <span class="col2">{{ propertyInfo.description }}</span>
+                        <span class="col3">{{ propertyInfo.writable }}</span>
+                      </li>
+                    </div>
                   </ul>
-                </div>
+                <!-- </div> -->
               </div>
             </div>
 
@@ -444,7 +453,7 @@
   <script type="text/x-template" id="tmpl-page-setting">
     <div>
       <!-- input data -->
-      <div class="card mb-3">
+      <div class="card">
         <!-- input data header -->
         <div class="card-header py-1">
           <div class="row">
@@ -463,7 +472,7 @@
         <div class="card-body pt-2 pb-2">
           <form>
             <div class="form-row">
-              <div class="input-group mb-2 mx-1">
+              <div class="input-group mb-1 mx-1">
                 <div class="input-group-prepend">
                   <div class="input-group-text">Scheme</div>
                 </div>
@@ -478,7 +487,7 @@
               </div>
             </div>
             <div class="form-row">
-              <div class="input-group mb-2 mx-1">
+              <div class="input-group mb-1 mx-1">
                 <div class="input-group-prepend">
                   <div class="input-group-text">Server name</div>
                 </div>
@@ -486,7 +495,7 @@
               </div>
             </div>
             <div class="form-row">
-              <div class="input-group mb-2 mx-1">
+              <div class="input-group mb-1 mx-1">
                 <div class="input-group-prepend">
                   <div class="input-group-text">Prefix</div>
                 </div>
@@ -494,7 +503,7 @@
               </div>
             </div>
             <div class="form-row">
-              <div class="input-group mb-2 mx-1">
+              <div class="input-group mb-1 mx-1">
                 <div class="input-group-prepend">
                   <div class="input-group-text">API key</div>
                 </div>
@@ -532,14 +541,16 @@
 
         <!-- body -->
         <div class="card-body" id="setting-devices-body">
-          <div id="setting-devices-list-wrapper">
+          <!-- <div id="setting-devices-list-wrapper"> -->
             <ul class="list-group" id="setting-devices-list">
-              <li class="list-group-item d-flex align-items-start" id="devices-header" tabindex="0">
+              <li class="list-group-item d-flex align-items-start list-header" tabindex="0">
                 <span class="col1">Device Type</span>
                 <span class="col2">Device Id</span>
                 <span class="col3">削除</span>
               </li>
-              <li v-for="(idInfo, index) in idInfoList" class="list-group-item d-flex align-items-start" v-bind:id="idInfo.id" tabindex="0">
+
+          <div id="setting-devices-list-wrapper">
+            <li v-for="(idInfo, index) in idInfoList" class="list-group-item d-flex align-items-start" v-bind:id="idInfo.id" tabindex="0">
                 <span class="col1">{{ idInfo.deviceType }}</span>
                 <span class="col2">{{ idInfo.id }}</span>
                 <span class="col3">
@@ -548,8 +559,10 @@
                   </button>
                 </span>
               </li>
-            </ul>
           </div>
+
+            </ul>
+          <!-- </div> -->
         </div>
       </div>
 

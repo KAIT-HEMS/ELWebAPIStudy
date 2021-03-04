@@ -1,21 +1,12 @@
 // main.js for ELWebAPIStudy
-// 2021.03.02
+// 2021.03.04
 // Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium
 // Released under the MIT License.
 
 "use strict";
 
-// app frame config
 const appname = "ELWebAPIStudy";
-
-//////////////////////////////////////////////////////////////////////
-// 基本ライブラリ
-const { app, BrowserWindow, ipcMain, Menu, shell } = require("electron");
-
-const path = require("path");
-const util = require("util");
-const os = require("os");
-const fs = require("fs");
+const { app, BrowserWindow, Menu } = require("electron");
 
 // electronのmain window
 let mainWindow = null;
@@ -33,6 +24,14 @@ function createWindow() {
       preload: "http://localhost:3020/index.js",
     },
   });
+
+  // customize menu (remove items)
+  const menu = Menu.getApplicationMenu(); // get default menu
+  menu.items.find((item) => item.label === "File").visible = false;
+  menu.items.find((item) => item.label === "View").visible = false;
+  menu.items.find((item) => item.label === "Window").visible = false;
+  menu.items.find((item) => item.role === "help").visible = false;
+  Menu.setApplicationMenu(menu); // set the modified menu
 
   mainWindow.loadURL("http://localhost:3020/");
 
