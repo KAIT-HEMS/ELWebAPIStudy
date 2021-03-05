@@ -38,7 +38,7 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "./build/icons/mac/icon.icns"
+        "icon": "./build/icons/icon"
       },
       "makers": [
         {
