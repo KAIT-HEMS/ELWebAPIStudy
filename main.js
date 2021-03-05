@@ -32,6 +32,7 @@ function createWindow() {
   menu.items.find((item) => item.label === "Window").visible = false;
   menu.items.find((item) => item.role === "help").visible = false;
   Menu.setApplicationMenu(menu); // set the modified menu
+  mainWindow.setMenu(menu);
 
   mainWindow.loadURL("http://localhost:3020/");
 
