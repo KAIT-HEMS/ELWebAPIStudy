@@ -1,5 +1,5 @@
 // main.js for ELWebAPIStudy
-// 2021.03.04
+// 2021.03.05
 // Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium
 // Released under the MIT License.
 
@@ -17,7 +17,7 @@ mainFunction.funcIndex();
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1100,
-    height: 768,
+    height: 770,
     webPreferences: {
       nodeIntegration: false,
       worldSafeExecuteJavaScript: true,
@@ -44,15 +44,7 @@ function createWindow() {
     },
   ];
   const menu = Menu.buildFromTemplate(menuItems);
-
-  // // customize menu (remove items)
-  // const menu = Menu.getApplicationMenu(); // get default menu
-  // menu.items.find((item) => item.label === "File").visible = false;
-  // menu.items.find((item) => item.label === "View").visible = false;
-  // menu.items.find((item) => item.label === "Window").visible = false;
-  // menu.items.find((item) => item.role === "help").visible = false;
   Menu.setApplicationMenu(menu); // set the modified menu
-  // mainWindow.setMenu(menu);
 
   mainWindow.loadURL("http://localhost:3020/");
 
