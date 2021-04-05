@@ -7,6 +7,7 @@
     "start": "electron .",
     "build-win": "electron-builder --win --x64",
     "build-mac": "electron-builder --mac --x64",
+    "build-appx": "electron-builder -w appx",
     "postinstall": "electron-builder install-app-deps"
   },
   "build": {
@@ -34,6 +35,13 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
+    },
+    "appx": {
+      "identityName":"ECHONETCONSORTIUM.elapistudy",
+      "applicationId":"ECHONETCONSORTIUM.elapistudy",
+      "publisherDisplayName":"ECHONET CONSORTIUM",
+      "publisher":"CN=5F03B850-25B1-47D3-8220-00E719EEF23A",
+      "languages":["JA-JP"]
     }
   },
   "repository": {

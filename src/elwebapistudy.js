@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // elwebapistudy.js for ELWebAPIStudy
-// 2021.03.02
+// 2021.04.05
 // Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium
 // Released under the MIT License.
 // access http://localhost:3020/elwebapistudy

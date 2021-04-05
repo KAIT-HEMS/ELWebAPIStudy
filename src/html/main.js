@@ -1,5 +1,5 @@
 // main.js for elwebapistudy(client side)
-// 2021.03.04
+// 2021.04.05
 // Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium
 // Released under the MIT License.
 //
