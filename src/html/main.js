@@ -9,6 +9,13 @@
 
 "use strict";
 
+const os = require("os");
+const fs = require("fs");
+const path = require("path");
+const scheme = "https";
+const elApiServer = "webapiechonet.com";
+const prefix = "/elapi/v1";
+
 const g_serverURL = "/elwebapistudy/"; // SPAのweb serverのURL
 let g_thingInfo = {};
 // thing id(device id, group id, bulk id, history id)をkeyとして、以下の項目を保持
@@ -355,30 +362,33 @@ const template_setting = {
   methods: {
     // 設定保存ボタンがクリックされたときの処理
     saveSettingsButtonIsClicked: function () {
-      const configData = {
-        scheme: this.scheme,
-        elApiServer: this.elApiServer,
-        prefix: this.prefix,
-        apiKey: this.apiKey,
-      };
-      console.log("saveSettingsButtonIsClicked", configData);
-      saveConfig(configData);
+      // const configData = {
+      //   scheme: this.scheme,
+      //   elApiServer: this.elApiServer,
+      //   prefix: this.prefix,
+      //   apiKey: this.apiKey,
+      // };
+      // console.log("saveSettingsButtonIsClicked", configData);
+      // saveConfig(configData);
+      console.log("saveSettingsButtonIsClicked", this.apiKey);
+      saveApiKey(this.apiKey);
+
       // 起動時処理が完了していなくて、apiKeyが設定されている場合、機器一覧取得を行う。
       if (!g_flagIsBootProcessFinished && this.apiKey) {
         const requestMethod = "GET";
         const message = accessElServer(
-          this.scheme,
-          this.elApiServer,
+          scheme,
+          elApiServer,
           this.apiKey,
           requestMethod,
-          this.prefix,
+          prefix,
           "/devices",
           "",
           "",
           "",
           "",
           ""
-        );  
+        );
       }
     },
     // デバイス削除ボタン(Trash can)がクリックされたときの処理
@@ -443,7 +453,7 @@ const template_setting = {
         "",
         "",
         ""
-      );  
+      );
     }
   },
 };
@@ -592,6 +602,16 @@ function saveConfig(configData) {
   console.log("saveConfig: message", message);
   const request = new XMLHttpRequest();
   request.open("PUT", g_serverURL + "config");
+  request.setRequestHeader("Content-type", "application/json");
+  request.send(JSON.stringify(message));
+}
+
+// saveApiKey の保存をサーバーに依頼
+function saveApiKey(apiKey) {
+  const message = { apiKey: apiKey };
+  console.log("saveApiKey: message", message);
+  const request = new XMLHttpRequest();
+  request.open("PUT", g_serverURL + "apiKey");
   request.setRequestHeader("Content-type", "application/json");
   request.send(JSON.stringify(message));
 }
@@ -1409,17 +1429,17 @@ Vue.component("ctrl-smartMeter", {
     normalDirectionCumulativeElectricEnergy: {
       get() {
         return vm.smartMeterNormalDirectionCumulativeElectricEnergy;
-      }
+      },
     },
     instantaneousElectricPower: {
       get() {
         return vm.smartMeterInstantaneousElectricPower;
-      }
+      },
     },
     normalDirectionCumulativeElectricEnergyLog1: {
       get() {
         return vm.smartMeterNormalDirectionCumulativeElectricEnergyLog1;
-      }
+      },
     },
     queryDayValue: {
       get() {
@@ -1432,7 +1452,9 @@ Vue.component("ctrl-smartMeter", {
   },
   methods: {
     getNormalDirectionCumulativeElectricEnergy: function () {
-      console.log("getNormalDirectionCumulativeElectricEnergy がクリックされました。");
+      console.log(
+        "getNormalDirectionCumulativeElectricEnergy がクリックされました。"
+      );
       const requestMethod = "GET";
       if (vm.device_id !== "") {
         g_flagSendButtonIsClicked = true;
@@ -1488,7 +1510,9 @@ Vue.component("ctrl-smartMeter", {
       }
     },
     getNormalDirectionCumulativeElectricEnergyLog1: function () {
-      console.log("getNormalDirectionCumulativeElectricEnergyLog1 がクリックされました。");
+      console.log(
+        "getNormalDirectionCumulativeElectricEnergyLog1 がクリックされました。"
+      );
       // console.log("query", this.queryDayValue);
       const requestMethod = "GET";
       if (vm.device_id !== "") {
@@ -1559,7 +1583,6 @@ Vue.component("ctrl-smartMeter", {
   `,
 });
 
-
 // Vueのインスタンス作成
 let vm = new Vue({
   el: "#app",
@@ -1574,11 +1597,77 @@ ws.onopen = function (event) {
   console.log(" WebSocket: connected");
 };
 
+// 起動時に、server側のファイル apikey.txt のデータをリクエストする。その値をvmに設定する。
+// apiKeyがblankの場合、Alert ダイアログを表示する。
+//  (electron では window.prompt がサポートされていないので、window.alert)
+// XHR 非同期処理
+
+vm.scheme = scheme;
+vm.elApiServer = elApiServer;
+vm.prefix = prefix;
+
+function reqListenerApikey() {
+  let update_flag = false;
+  console.log("apiKey!:", this.responseText);
+  const apiKey = this.responseText;
+  if (apiKey === undefined || apiKey == "" || apiKey == null) {
+    g_flagIsApikeyEmpty = true;
+    console.log("apiKey is undefined or empty");
+    window.alert("Api Key が設定されていません。設定画面で入力してください。");
+  } else {
+    g_flagIsApikeyEmpty = false;
+  }
+
+  vm.apiKey = apiKey;
+
+  if (update_flag) {
+    // const configData = {
+    //   scheme: config.scheme,
+    //   elApiServer: config.elApiServer,
+    //   prefix: config.prefix,
+    //   apiKey: config.apiKey,
+    // };
+    // console.log("Update config.json!", configData);
+    // saveConfig(configData);
+    console.log("Update apiKey!", apiKey);
+    saveApiKey(apiKey);
+  }
+
+  // config.json取得後の起動処理
+  // apikey が設定設定されていたら 機器一覧を ELWebAPI Server から取得する
+  // ELWebAPI Server からのresponseは非同期処理、websocketで通知される。
+  if (!g_flagIsApikeyEmpty) {
+    const requestMethod = "GET";
+    const message = accessElServer(
+      scheme,
+      elApiServer,
+      apiKey,
+      requestMethod,
+      prefix,
+      "/devices",
+      "",
+      "",
+      "",
+      "",
+      ""
+    );  
+  }
+}
+
+const request = new XMLHttpRequest();
+request.addEventListener("load", reqListenerApikey);
+request.open("GET", g_serverURL + "apiKey");
+request.send();
+
+
+// FYI: オリジナルのソースコード
 // 起動時に、server側のファイルconfig.jsonのデータをリクエストする。その値をvmに設定する。
 // config.json の中身の scheme, elApiServer, prefix が設定されていない場合は default 値を設定し、condif.json に書き込む
 // apiKeyがblankの場合、Alert ダイアログを表示する。
 //  (electron では window.prompt がサポートされていないので、window.alert)
 // XHR 非同期処理
+
+/*
 function reqListener() {
   let update_flag = false;
   console.log("config.json!:", this.responseText);
@@ -1648,6 +1737,7 @@ const request = new XMLHttpRequest();
 request.addEventListener("load", reqListener);
 request.open("GET", g_serverURL + "config");
 request.send();
+*/
 
 // websocket:受信処理
 // index.js内のwebserverがECHONET Lite WebApi serverにRESTでアクセスし、
@@ -2004,14 +2094,24 @@ ws.onmessage = function (event) {
           }
         } else if (vm.deviceType == "lvSmartElectricEnergyMeter") {
           console.log("response is property value for smartMeter");
-          if (obj.response.normalDirectionCumulativeElectricEnergy !== undefined) {
-            vm.smartMeterNormalDirectionCumulativeElectricEnergy = obj.response.normalDirectionCumulativeElectricEnergy;
+          if (
+            obj.response.normalDirectionCumulativeElectricEnergy !== undefined
+          ) {
+            vm.smartMeterNormalDirectionCumulativeElectricEnergy =
+              obj.response.normalDirectionCumulativeElectricEnergy;
           }
           if (obj.response.instantaneousElectricPower !== undefined) {
-            console.log("instantaneousElectricPower is", obj.response.instantaneousElectricPower);
-            vm.smartMeterInstantaneousElectricPower = obj.response.instantaneousElectricPower;
+            console.log(
+              "instantaneousElectricPower is",
+              obj.response.instantaneousElectricPower
+            );
+            vm.smartMeterInstantaneousElectricPower =
+              obj.response.instantaneousElectricPower;
           }
-          if (obj.response.normalDirectionCumulativeElectricEnergyLog1 !== undefined) {
+          if (
+            obj.response.normalDirectionCumulativeElectricEnergyLog1 !==
+            undefined
+          ) {
             console.log(
               "normalDirectionCumulativeElectricEnergyLog1 is",
               obj.response.normalDirectionCumulativeElectricEnergyLog1

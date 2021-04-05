@@ -1,5 +1,5 @@
 // main.js for ELWebAPIStudy
-// 2021.03.05
+// 2021.04.05
 // Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium
 // Released under the MIT License.
 
@@ -19,7 +19,8 @@ function createWindow() {
     width: 1100,
     height: 770,
     webPreferences: {
-      nodeIntegration: false,
+      nodeIntegration: true,
+      contextIsolation: false,
       worldSafeExecuteJavaScript: true,
       preload: "http://localhost:3020/index.js",
     },

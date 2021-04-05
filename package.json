@@ -1,12 +1,40 @@
 {
-  "name": "elapi-study",
+  "name": "elapistudy",
   "version": "0.5.0",
   "description": "ECHONET Lite Web API study tool",
-  "main": "main.js",
+  "main": "src/main.js",
   "scripts": {
-    "start": "electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make"
+    "start": "electron .",
+    "build-win": "electron-builder --win --x64",
+    "build-mac": "electron-builder --mac --x64",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "com.hirofujita.elapistudy",
+    "productName": "elapistudy",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "assets",
+      "src",
+      "package.json",
+      "package-lock.json"
+    ],
+    "mac": {
+      "icon": "assets/mac/icon.icns",
+      "target": [
+        "dmg"
+      ]
+    },
+    "win": {
+      "icon": "assets/win/icon.ico",
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   },
   "repository": {
     "type": "git",
@@ -23,45 +51,11 @@
   },
   "homepage": "https://github.com/KAIT-HEMS/ELWebAPIStudy#readme",
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.0-beta.54",
-    "@electron-forge/maker-deb": "^6.0.0-beta.54",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.54",
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
-    "@electron-forge/maker-zip": "^6.0.0-beta.54",
-    "electron": "11.3.0"
+    "electron": "11.3.0",
+    "electron-builder": "^22.10.5"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0",
     "express": "^4.17.1",
     "ws": "^7.4.3"
-  },
-  "config": {
-    "forge": {
-      "packagerConfig": {
-        "icon": "./build/icons/icon"
-      },
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "elapi_study"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
-        }
-      ]
-    }
   }
 }

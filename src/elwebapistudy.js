@@ -16,21 +16,36 @@ let express = require('express');
 let app = express();
 let server = require('http').Server(app);
 const fs = require('fs');
+const os = require('os');
+const tmpdir = os.tmpdir();
+console.log('tmpdir:', tmpdir);
 const path = require('path');
 const https = require('https');
 const WebSocket = require("ws").Server;
 const wss = new WebSocket({ server });
 const port = process.env.PORT || portNumber;
 let config ={}; // config.json data
-
+let apiKey ="";
 const configPath = path.join(__dirname, 'config.json');
+const apiKeyPath = path.join(tmpdir, 'apikey.txt');
 
 module.exports.funcIndex = function() {  // Addition on 2021.02.01
+
+/*
 // 設定データ(config.json)の読み込み
 fs.readFile(configPath, 'utf8', (err, data) => {
     if (err) throw err;
   config = JSON.parse(data);
   console.log("\nconfig.json:", config);
+});
+*/
+
+// apiKey の読み込み
+fs.readFile(apiKeyPath, 'utf8', (err, data) => {
+  // if (err) throw err;
+  if (err) console.log("no apikey.txt");
+  apiKey = data;
+  console.log("\napiKey.txt:", data);
 });
 
 // web serverの起動
@@ -75,6 +90,21 @@ app.put('/elwebapistudy/config', function(req, res){
   res.send("Got a PUT request at /elwebapistudy/config");
 });
 
+// GET /elwebapistudy/apiKey
+// request apiKey.txt data
+app.get('/elwebapistudy/apiKey', function(req, res){
+  console.log("\nREST: GET /elwebapistudy/apiKey");
+  res.send(apiKey);
+});
+
+// PUT /elwebapistudy/apiKey
+// update apiKey.txt data
+app.put('/elwebapistudy/apiKey', function(req, res){
+  console.log("\nREST: PUT /elwebapistudy/apiKey\n", req.body.apiKey);
+  updateApiKey(req.body.apiKey);
+  res.send("Got a PUT request at /elwebapistudy/apiKey");
+});
+
 // EL web api serverへのREST送信のリクエスト
 app.put('/elwebapistudy/send', function(req, res){
   console.log("\nREST: PUT /elwebapistudy/send");
@@ -112,6 +142,16 @@ function updateConfig(data){ // data:string, config.json用のデータ
   fs.writeFile(configPath, buffer, (err) => {
     if (err) console.log("Error: Can not save config.json.");
     console.log('\nconfig.json has been saved!');
+  });
+}
+
+// apiKeyのupdate (writeFile apikey.txt)
+function updateApiKey(data){ // data:string, apiKey
+  const buffer = Buffer.from(data);
+  // fs.writeFile("config.json", buffer, (err) => {
+  fs.writeFile(apiKeyPath, buffer, (err) => {
+    if (err) console.log("Error: Can not save apikey.txt.");
+    console.log('\napikey.txt has been saved!');
   });
 }
 
