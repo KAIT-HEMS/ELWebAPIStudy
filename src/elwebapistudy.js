@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
 // elwebapistudy.js for ELWebAPIStudy
-// 2021.04.05
+// 2021.06.15
 // Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium
 // Released under the MIT License.
 // access http://localhost:3020/elwebapistudy
  
 'use strict';
 
-const VERSION = "0.5.0 rev.20210304";
+const VERSION = "1.0.0 rev.20210615";
 const portNumber = 3020;
 const appname = 'ELWebAPIStudy';
 

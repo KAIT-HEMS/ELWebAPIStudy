@@ -1,5 +1,5 @@
 // main.js for elwebapistudy(client side)
-// 2021.04.05
+// 2021.04.14
 // Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium
 // Released under the MIT License.
 //
@@ -32,7 +32,7 @@ let g_flagIsApikeyEmpty = true; // 起動時に apikey が設定されていな�
 
 let bind_data = {
   // Software version
-  version: "v0.5.0",
+  version: "v1.0.0",
 
   // data in config.json
   scheme: "",
