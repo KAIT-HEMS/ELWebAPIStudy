@@ -1,5 +1,5 @@
 // main.js for elwebapistudy(client side)
-// 2021.04.14
+// 2021.06.21
 // Copyright (c) 2021 Kanagawa Institute of Technology, ECHONET Consortium
 // Released under the MIT License.
 //
@@ -32,7 +32,7 @@ let g_flagIsApikeyEmpty = true; // 起動時に apikey が設定されていな�
 
 let bind_data = {
   // Software version
-  version: "v1.0.0",
+  version: "v1.0.1",
 
   // data in config.json
   scheme: "",
@@ -1613,7 +1613,7 @@ function reqListenerApikey() {
   if (apiKey === undefined || apiKey == "" || apiKey == null) {
     g_flagIsApikeyEmpty = true;
     console.log("apiKey is undefined or empty");
-    window.alert("Api Key が設定されていません。設定画面で入力してください。");
+    window.alert("API key が設定されていません。設定画面で入力してください。");
   } else {
     g_flagIsApikeyEmpty = false;
   }

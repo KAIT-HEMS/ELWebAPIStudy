@@ -43,6 +43,15 @@ function createWindow() {
         { role: 'selectAll' }
       ],
     },
+    // {
+    //   label: 'View',
+    //   submenu: [
+    //     {
+    //       label: 'Toggle Developer Tools',
+    //       click: function() { mainWindow.toggleDevTools(); }
+    //     },
+    //   ]
+    // }
   ];
   const menu = Menu.buildFromTemplate(menuItems);
   Menu.setApplicationMenu(menu); // set the modified menu
